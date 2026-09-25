@@ -9,6 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
 
+  <!-- 画像文字認識用（無料・ブラウザ完結） -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
   <style>
     /* ===================================================
        1. ダークモード（黒背景・ネオン系）
@@ -58,7 +61,7 @@
       background-color: var(--bg-base);
       color: var(--text-main);
       padding: 16px;
-      padding-bottom: 110px; /* ボトムバーの分 */
+      padding-bottom: 110px;
       min-height: 100vh;
     }
 
@@ -69,31 +72,11 @@
       margin-bottom: 12px;
     }
 
-    .logo-area {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
+    .logo-area { display: flex; align-items: baseline; gap: 8px; }
+    h1 { font-size: 1.3rem; font-weight: 700; color: var(--color-1); letter-spacing: 0.5px; }
+    .count-badge { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
 
-    h1 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--color-1);
-      letter-spacing: 0.5px;
-    }
-
-    .count-badge {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .header-actions { display: flex; align-items: center; gap: 8px; }
     .icon-btn {
       background: var(--bg-surface);
       border: 1.5px solid var(--border-color);
@@ -109,13 +92,7 @@
     }
     .icon-btn:active { transform: scale(0.96); }
 
-    /* コントロール */
-    .controls {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
+    .controls { display: flex; gap: 8px; margin-bottom: 12px; }
     .search-box {
       flex: 1;
       padding: 10px 14px;
@@ -129,7 +106,6 @@
     .search-box:focus { border-color: var(--color-2); }
     .search-box::placeholder { color: var(--text-muted); opacity: 0.8; }
 
-    /* 横スクロールタグ */
     .category-scroll {
       display: flex;
       gap: 8px;
@@ -163,12 +139,7 @@
     }
     .cat-count { font-size: 0.7rem; opacity: 0.85; }
 
-    /* カード共通 */
-    .card-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    .card-list { display: flex; flex-direction: column; gap: 16px; }
 
     .card {
       background: var(--bg-surface);
@@ -179,10 +150,18 @@
       flex-direction: column;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
+    .card.is-favorite { border-color: var(--color-2); }
 
-    .card.is-favorite {
-      border-color: var(--color-2);
+    .card-image-wrap {
+      width: 100%;
+      max-height: 260px;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
+    .card-image { width: 100%; height: 100%; object-fit: cover; }
 
     .card-body {
       padding: 14px;
@@ -198,37 +177,12 @@
       gap: 8px;
     }
 
-    .title-area {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex: 1;
-    }
+    .title-area { display: flex; align-items: center; gap: 6px; flex: 1; }
+    .fav-star { cursor: pointer; font-size: 1.25rem; color: var(--text-muted); user-select: none; }
+    .fav-star.active { color: #ffb703; transform: scale(1.1); }
+    .card-title { font-weight: 700; font-size: 1.05rem; color: var(--text-main); word-break: break-all; }
 
-    .fav-star {
-      cursor: pointer;
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      user-select: none;
-    }
-    .fav-star.active {
-      color: #ffb703;
-      transform: scale(1.1);
-    }
-
-    .card-title {
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--text-main);
-      word-break: break-all;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
     .tag {
       font-size: 0.72rem;
       font-weight: 600;
@@ -242,7 +196,6 @@
     .tag-brand { color: var(--color-2); border-color: var(--color-2); }
     .tag-area { color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); }
 
-    /* プロンプト・SNS本文ボックス */
     .content-box {
       background: var(--bg-subtle);
       border-radius: 10px;
@@ -252,7 +205,7 @@
       color: var(--text-main);
       white-space: pre-wrap;
       word-break: break-all;
-      max-height: 110px;
+      max-height: 100px;
       overflow-y: auto;
       border: 1px dashed var(--border-color);
     }
@@ -260,23 +213,7 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
-    /* 画像プレビュー */
-    .card-image-wrap {
-      width: 100%;
-      max-height: 240px;
-      overflow: hidden;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .card-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* 変数プレースホルダー置換 */
+    /* 変数置換 */
     .variable-container {
       background: rgba(133, 135, 248, 0.08);
       border: 1px solid var(--border-color);
@@ -286,16 +223,8 @@
       flex-direction: column;
       gap: 6px;
     }
-    .variable-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--color-1);
-    }
-    .variable-inputs {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 6px;
-    }
+    .variable-title { font-size: 0.72rem; font-weight: 700; color: var(--color-1); }
+    .variable-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
     .var-field {
       padding: 4px 8px;
       border-radius: 6px;
@@ -305,14 +234,9 @@
       font-size: 0.8rem;
       outline: none;
     }
-    .var-field:focus { border-color: var(--color-2); }
 
     /* メモ */
-    .memo-section {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .memo-section { display: flex; flex-direction: column; gap: 6px; }
     .note-box {
       font-size: 0.83rem;
       line-height: 1.4;
@@ -323,11 +247,7 @@
       border-left: 3.5px solid var(--color-3);
       white-space: pre-wrap;
     }
-    .memo-editor {
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .memo-editor { display: none; flex-direction: column; gap: 6px; }
     .memo-textarea {
       width: 100%;
       padding: 8px;
@@ -363,12 +283,7 @@
       border-top: 1px solid rgba(133, 135, 248, 0.12);
     }
 
-    .link-group {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
+    .link-group { display: flex; gap: 10px; align-items: center; }
     .action-link {
       font-size: 0.82rem;
       font-weight: 600;
@@ -394,26 +309,13 @@
       transition: transform 0.15s;
     }
     .btn:active { transform: scale(0.96); }
-
-    .btn-copy {
-      background: var(--color-2);
-      color: var(--btn-text-primary);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-
-    .btn-delete-card {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
+    .btn-copy { background: var(--color-2); color: var(--btn-text-primary); }
+    .btn-delete-card { background: transparent; border: none; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; }
     .btn-delete-card:hover { color: var(--color-3); }
 
-    /* フローティング追加ボタン */
     .fab {
       position: fixed;
-      bottom: 74px; /* ボトムバーの上 */
+      bottom: 74px;
       right: 20px;
       width: 56px;
       height: 56px;
@@ -431,7 +333,6 @@
     }
     .fab:active { transform: scale(0.92); }
 
-    /* 下部ボトムナビゲーション */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -461,21 +362,15 @@
       font-size: 0.72rem;
       font-weight: 600;
       cursor: pointer;
-      transition: color 0.15s ease;
     }
-
-    .nav-item.active {
-      color: var(--color-2);
-    }
-    .nav-icon {
-      font-size: 1.25rem;
-    }
+    .nav-item.active { color: var(--color-2); }
+    .nav-icon { font-size: 1.25rem; }
 
     /* モーダル */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(10, 10, 16, 0.65);
+      background: rgba(10, 10, 16, 0.7);
       backdrop-filter: blur(4px);
       display: none;
       align-items: center;
@@ -488,11 +383,11 @@
       border: 1.5px solid var(--border-color);
       border-radius: 16px;
       width: 100%;
-      max-width: 480px;
+      max-width: 460px;
       padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
@@ -502,7 +397,7 @@
 
     .input-field {
       width: 100%;
-      padding: 9px 12px;
+      padding: 10px 12px;
       border-radius: 8px;
       border: 1.5px solid var(--border-color);
       background: var(--bg-subtle);
@@ -511,25 +406,35 @@
       outline: none;
     }
     .input-field:focus { border-color: var(--color-2); }
-    textarea.input-field { resize: vertical; min-height: 90px; }
 
-    .file-input-box {
+    /* スクショ簡単アップロード用ビッグボタン */
+    .screenshot-dropzone {
       background: var(--bg-subtle);
-      border: 1.5px dashed var(--border-color);
-      padding: 10px;
-      border-radius: 8px;
+      border: 2px dashed var(--color-2);
+      border-radius: 12px;
+      padding: 20px 14px;
       text-align: center;
-      font-size: 0.8rem;
-      color: var(--text-muted);
       cursor: pointer;
-    }
-
-    .modal-btns {
       display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 4px;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     }
+    .drop-icon { font-size: 1.8rem; }
+    .drop-text { font-size: 0.88rem; font-weight: 700; color: var(--text-main); }
+    .drop-sub { font-size: 0.72rem; color: var(--text-muted); }
+
+    .ocr-status {
+      display: none;
+      font-size: 0.78rem;
+      color: var(--color-2);
+      text-align: center;
+      font-weight: 600;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+    .modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
     .btn-save { background: var(--color-2); color: var(--btn-text-primary); }
     .btn-secondary { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border-color); }
   </style>
@@ -549,21 +454,15 @@
     </div>
   </header>
 
-  <!-- 検索バー -->
   <div class="controls">
-    <input type="text" id="search" class="search-box" placeholder="キーワード検索...">
+    <input type="text" id="search" class="search-box" placeholder="検索...">
   </div>
 
-  <!-- 横スクロールタグフィルター -->
   <div id="categoryFilter" class="category-scroll"></div>
-
-  <!-- カード一覧表示エリア -->
   <div id="cardList" class="card-list"></div>
 
-  <!-- 新規作成ボタン -->
   <button class="fab" id="openModalBtn" aria-label="新規作成">＋</button>
 
-  <!-- 下部ボトムナビゲーション -->
   <nav class="bottom-nav">
     <button class="nav-item active" id="tabPrompts">
       <span class="nav-icon">💬</span>
@@ -575,55 +474,68 @@
     </button>
   </nav>
 
-  <!-- モーダル（共通フォーム） -->
-  <div class="modal-overlay" id="modal">
+  <!-- 1. プロンプト用モーダル -->
+  <div class="modal-overlay" id="promptModal">
     <div class="modal">
-      <h2 id="modalTitle">プロンプト追加</h2>
-      <p class="helper-text" id="modalHelper">本文を貼るだけでタイトルやタグを自動推定します！</p>
-      
-      <textarea id="modalText" class="input-field" placeholder="本文（必須）..." rows="5" required></textarea>
-      <input type="text" id="modalTitleInput" class="input-field" placeholder="タイトル（空欄で自動抽出）">
-      <input type="url" id="modalUrl" class="input-field" placeholder="参考URL（Xやインスタのリンクなど）">
-      
-      <!-- SNSタブの時だけ表示される画像フィールド -->
-      <div id="imageFieldGroup">
-        <label class="file-input-box" for="imageInput">
-          <span id="imageLabel">📷 写真・スクショを選択 (推奨)</span>
-          <input type="file" id="imageInput" accept="image/*" style="display: none;">
-        </label>
-        <input type="hidden" id="imageData">
-      </div>
-
-      <input type="text" id="modalTags" class="input-field" placeholder="タグ（カンマ区切り / 空欄で自動抽出）">
-
+      <h2>プロンプト追加</h2>
+      <p class="helper-text">本文だけ貼ればタイトル・タグを自動推定！[変数] で穴埋め対応</p>
+      <textarea id="promptInputText" class="input-field" placeholder="プロンプト本文（必須）..." rows="5" required></textarea>
+      <input type="text" id="promptInputTitle" class="input-field" placeholder="タイトル（空欄で自動抽出）">
+      <input type="url" id="promptInputUrl" class="input-field" placeholder="元ネタURL（Xのリンクなど）">
+      <input type="text" id="promptInputTags" class="input-field" placeholder="タグ（カンマ区切り / 空欄で自動抽出）">
       <div class="modal-btns">
-        <button class="btn btn-secondary" id="closeModalBtn">キャンセル</button>
-        <button class="btn btn-save" id="saveBtn">保存する</button>
+        <button class="btn btn-secondary" onclick="closeModals()">キャンセル</button>
+        <button class="btn btn-save" id="savePromptBtn">保存する</button>
       </div>
     </div>
   </div>
 
-  <!-- バックアップ・復元モーダル -->
+  <!-- 2. SNS保存用モーダル（スクショかURLだけでOK） -->
+  <div class="modal-overlay" id="clipModal">
+    <div class="modal">
+      <h2>投稿をストック</h2>
+      <p class="helper-text">スクショを選ぶだけで、店名や都道府県を自動スキャンします！</p>
+      
+      <!-- スクショアップロードゾーン -->
+      <label class="screenshot-dropzone" for="clipImageInput">
+        <span class="drop-icon">📷</span>
+        <span class="drop-text" id="dropLabel">スクショ・写真を選択</span>
+        <span class="drop-sub">画像から文字・店名・タグを自動読み取り</span>
+        <input type="file" id="clipImageInput" accept="image/*" style="display: none;">
+      </label>
+      <div id="ocrStatus" class="ocr-status">🔍 スキャン解析中... 少々お待ちください</div>
+      <input type="hidden" id="clipImageData">
+
+      <div style="text-align: center; font-size: 0.78rem; color: var(--text-muted);">または</div>
+
+      <input type="url" id="clipUrlInput" class="input-field" placeholder="投稿URL（Xやインスタのリンク）">
+      
+      <input type="text" id="clipMemoInput" class="input-field" placeholder="ひとことメモ（任意: 美味しそう、今度行くなど）">
+
+      <div class="modal-btns">
+        <button class="btn btn-secondary" onclick="closeModals()">キャンセル</button>
+        <button class="btn btn-save" id="saveClipBtn">ストック保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- バックアップモーダル -->
   <div class="modal-overlay" id="backupModal">
     <div class="modal">
       <h2>データ管理・バックアップ</h2>
-      <p class="helper-text">プロンプトとSNSクリップの全データをファイル保存・復元できます。</p>
-      
+      <p class="helper-text">全データをファイル保存・復元できます。</p>
       <button class="btn btn-save" id="exportBtn" style="width: 100%; padding: 10px;">📤 データを書き出す (JSON保存)</button>
-      
       <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 6px 0;">
-      
       <label style="font-size: 0.85rem; font-weight: 600;">📥 データを読み込む (復元):</label>
       <input type="file" id="importInput" accept=".json" class="input-field">
-
       <div class="modal-btns">
-        <button class="btn btn-secondary" id="closeBackupModalBtn">閉じる</button>
+        <button class="btn btn-secondary" onclick="closeModals()">閉じる</button>
       </div>
     </div>
   </div>
 
   <script>
-    // --- 1. テーマ設定 ---
+    // --- テーマ設定 ---
     const THEME_KEY = 'unified_stock_theme';
     const htmlEl = document.documentElement;
     const themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -634,16 +546,12 @@
       localStorage.setItem(THEME_KEY, theme);
       themeIcon.textContent = (theme === 'dark') ? '☀️' : '🌙';
     }
-
-    const currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
-    applyTheme(currentTheme);
-
+    applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
     themeToggleBtn.addEventListener('click', () => {
-      const nextTheme = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      applyTheme(nextTheme);
+      applyTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
 
-    // --- 2. 自動抽出ルール ---
+    // --- 抽出辞書 ---
     const BRAND_RULES = [
       { name: '無印良品', regex: /無印良品|無印/i },
       { name: 'ダイソー', regex: /ダイソー|daiso/i },
@@ -684,33 +592,31 @@
 
     function extractTitle(text) {
       const bracketMatch = text.match(/[【『「](.*?)[】』」]/);
-      if (bracketMatch && bracketMatch[1].length <= 25) {
-        return bracketMatch[1];
-      }
+      if (bracketMatch && bracketMatch[1].length <= 25) return bracketMatch[1];
       const firstLine = text.trim().split('\n')[0].replace(/^[#\-*>\s]+/, '').trim();
-      return firstLine.length > 25 ? firstLine.slice(0, 25) + '…' : firstLine || '無題';
+      return firstLine.length > 25 ? firstLine.slice(0, 25) + '…' : firstLine || '無題のクリップ';
     }
 
-    function extractMetadata(text, isClip = false) {
+    function extractMetadata(text) {
       const tags = new Set();
       let detectedArea = null;
 
-      if (isClip) {
-        BRAND_RULES.forEach(b => { if (b.regex.test(text)) tags.add(b.name); });
-        GENRE_RULES.forEach(g => { if (g.regex.test(text)) tags.add(g.name); });
-        for (const pref of PREFECTURES) {
-          if (text.includes(pref)) {
-            tags.add(pref);
-            if (!detectedArea) detectedArea = pref;
-          }
+      BRAND_RULES.forEach(b => { if (b.regex.test(text)) tags.add(b.name); });
+      GENRE_RULES.forEach(g => { if (g.regex.test(text)) tags.add(g.name); });
+      for (const pref of PREFECTURES) {
+        if (text.includes(pref)) {
+          tags.add(pref);
+          if (!detectedArea) detectedArea = pref;
         }
-        if (tags.size === 0) tags.add('気になる');
-      } else {
-        PROMPT_RULES.forEach(p => { if (p.word.test(text)) tags.add(p.tag); });
-        if (tags.size === 0) tags.add('プロンプト');
       }
-
+      if (tags.size === 0) tags.add('SNS');
       return { tags: Array.from(tags), detectedArea };
+    }
+
+    function extractPromptTags(text) {
+      const tags = [];
+      PROMPT_RULES.forEach(p => { if (p.word.test(text)) tags.push(p.tag); });
+      return tags.length > 0 ? tags : ['プロンプト'];
     }
 
     function extractVariables(text) {
@@ -719,14 +625,14 @@
       return [...new Set(matches.map(m => m.slice(1, -1)))];
     }
 
-    // --- 3. データと状態管理 ---
+    // --- データと状態 ---
     const STORAGE_KEY_PROMPTS = 'my_prompts_data';
     const STORAGE_KEY_CLIPS = 'my_sns_clips_data';
 
     let prompts = JSON.parse(localStorage.getItem(STORAGE_KEY_PROMPTS) || '[]');
     let clips = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIPS) || '[]');
 
-    let currentTab = 'prompts'; // 'prompts' | 'clips'
+    let currentTab = 'prompts';
     let selectedTag = 'ALL';
 
     const cardList = document.getElementById('cardList');
@@ -781,22 +687,17 @@
       }
     };
 
-    // --- 4. 描画処理 ---
+    // --- 描画 ---
     function renderCategoryBar(currentList) {
       const tagCounts = {};
       currentList.forEach(item => {
-        item.tags.forEach(t => {
-          tagCounts[t] = (tagCounts[t] || 0) + 1;
-        });
+        item.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
       });
 
       const tags = Object.keys(tagCounts);
-      if (selectedTag !== 'ALL' && !tags.includes(selectedTag)) {
-        selectedTag = 'ALL';
-      }
+      if (selectedTag !== 'ALL' && !tags.includes(selectedTag)) selectedTag = 'ALL';
 
       categoryFilter.innerHTML = '';
-
       const allChip = document.createElement('button');
       allChip.className = `cat-chip ${selectedTag === 'ALL' ? 'active' : ''}`;
       allChip.innerHTML = `すべて <span class="cat-count">(${currentList.length})</span>`;
@@ -820,14 +721,14 @@
       const currentList = isPrompt ? prompts : clips;
 
       appTitle.textContent = isPrompt ? 'Prompt Stock' : 'Clip Stock';
-      searchInput.placeholder = isPrompt ? 'プロンプト・タグ・メモから検索...' : '店名・エリア・商品・メモから検索...';
+      searchInput.placeholder = isPrompt ? 'プロンプト・タグ・メモから検索...' : '店名・エリア・タグ・メモから検索...';
 
       renderCategoryBar(currentList);
 
       const keyword = searchInput.value.toLowerCase();
       let filtered = currentList.filter(item => {
         const matchesTag = (selectedTag === 'ALL') || item.tags.includes(selectedTag);
-        const textToSearch = isPrompt ? item.prompt : item.text;
+        const textToSearch = isPrompt ? item.prompt : (item.scannedText || item.title);
         const matchesKeyword = 
           item.title.toLowerCase().includes(keyword) ||
           textToSearch.toLowerCase().includes(keyword) ||
@@ -836,7 +737,6 @@
         return matchesTag && matchesKeyword;
       });
 
-      // お気に入り優先ソート
       filtered.sort((a, b) => {
         if (a.isFavorite && !b.isFavorite) return -1;
         if (!a.isFavorite && b.isFavorite) return 1;
@@ -849,7 +749,7 @@
       if (filtered.length === 0) {
         cardList.innerHTML = `
           <div style="text-align: center; color: var(--text-muted); margin-top: 48px; font-size: 0.9rem;">
-            ${isPrompt ? 'プロンプトがありません' : 'クリップがありません'}<br>右下の「＋」からストックを追加してみましょう！
+            ${isPrompt ? 'プロンプトがありません' : 'ストックがありません'}<br>右下の「＋」から追加できます
           </div>
         `;
         return;
@@ -859,7 +759,6 @@
         const card = document.createElement('div');
         card.className = `card ${item.isFavorite ? 'is-favorite' : ''}`;
 
-        // タグ整形
         const tagElements = item.tags.map(t => {
           const isBrand = BRAND_RULES.some(b => b.name === t);
           const isArea = PREFECTURES.includes(t);
@@ -867,12 +766,10 @@
           return `<span class="tag ${extraClass}" onclick="selectSingleTag('${t}')">#${t}</span>`;
         }).join('');
 
-        // 画像
         const imageElement = item.image 
-          ? `<div class="card-image-wrap"><img src="${item.image}" class="card-image" alt="画像"></div>` 
+          ? `<div class="card-image-wrap"><img src="${item.image}" class="card-image" alt="スクショ"></div>` 
           : '';
 
-        // プロンプト用変数
         let varFormHtml = '';
         if (isPrompt) {
           const vars = extractVariables(item.prompt);
@@ -887,7 +784,6 @@
           }
         }
 
-        // リンク
         let linkGroupHtml = '';
         if (item.url) {
           const isInsta = item.url.includes('instagram.com');
@@ -899,7 +795,7 @@
           linkGroupHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchTarget)}" target="_blank" rel="noopener noreferrer" class="action-link link-map">📍 マップ</a>`;
         }
 
-        const bodyContent = isPrompt ? item.prompt : item.text;
+        const bodyContent = isPrompt ? item.prompt : (item.scannedText || '');
 
         card.innerHTML = `
           ${imageElement}
@@ -913,16 +809,16 @@
             </div>
 
             ${tagElements ? `<div class="tags">${tagElements}</div>` : ''}
-            <div class="content-box ${isPrompt ? 'code-font' : ''}">${bodyContent}</div>
+            ${bodyContent ? `<div class="content-box ${isPrompt ? 'code-font' : ''}">${bodyContent}</div>` : ''}
             ${varFormHtml}
 
             <div class="memo-section">
               ${item.memo ? `<div class="note-box" id="noteView-${item.id}">💬 ${item.memo}</div>` : ''}
               <button class="btn-memo-action" id="openMemoBtn-${item.id}">
-                ${item.memo ? '✏️ メモ編集' : '＋ メモ・感想を書く'}
+                ${item.memo ? '✏️ メモ編集' : '＋ メモを書く'}
               </button>
               <div class="memo-editor" id="memoEditor-${item.id}">
-                <textarea class="memo-textarea" id="memoInput-${item.id}" placeholder="メモ・使い勝手を記録...">${item.memo || ''}</textarea>
+                <textarea class="memo-textarea" id="memoInput-${item.id}" placeholder="感想や気付きをメモ...">${item.memo || ''}</textarea>
                 <div style="display:flex; justify-content:flex-end; gap:6px;">
                   <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" id="cancelMemoBtn-${item.id}">キャンセル</button>
                   <button class="btn btn-save" style="padding: 4px 10px; font-size: 0.75rem;" id="saveMemoBtn-${item.id}">保存</button>
@@ -937,7 +833,6 @@
           </div>
         `;
 
-        // コピーアクション（プロンプトのみ）
         if (isPrompt) {
           card.querySelector('.copy-btn').addEventListener('click', (e) => {
             let textToCopy = item.prompt;
@@ -951,7 +846,6 @@
           });
         }
 
-        // メモ編集トグル
         const openMemoBtn = card.querySelector(`#openMemoBtn-${item.id}`);
         const memoEditor = card.querySelector(`#memoEditor-${item.id}`);
         const cancelMemoBtn = card.querySelector(`#cancelMemoBtn-${item.id}`);
@@ -963,13 +857,11 @@
           openMemoBtn.style.display = 'none';
           memoInput.focus();
         });
-
         cancelMemoBtn.addEventListener('click', () => {
           memoEditor.style.display = 'none';
           openMemoBtn.style.display = 'inline-flex';
           memoInput.value = item.memo || '';
         });
-
         saveMemoBtn.addEventListener('click', () => {
           updateMemo(item.id, memoInput.value);
         });
@@ -983,7 +875,7 @@
       render();
     };
 
-    // --- 5. タブ切り替え ---
+    // --- タブ切り替え ---
     const tabPrompts = document.getElementById('tabPrompts');
     const tabClips = document.getElementById('tabClips');
 
@@ -1007,120 +899,163 @@
       render();
     });
 
-    // --- 6. モーダル・画像処理 ---
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalHelper = document.getElementById('modalHelper');
-    const modalText = document.getElementById('modalText');
-    const imageFieldGroup = document.getElementById('imageFieldGroup');
-    const imageInput = document.getElementById('imageInput');
-    const imageDataField = document.getElementById('imageData');
-    const imageLabel = document.getElementById('imageLabel');
+    // --- モーダル制御 ---
+    const promptModal = document.getElementById('promptModal');
+    const clipModal = document.getElementById('clipModal');
+    const backupModal = document.getElementById('backupModal');
 
-    imageInput.addEventListener('change', (e) => {
+    function closeModals() {
+      promptModal.style.display = 'none';
+      clipModal.style.display = 'none';
+      backupModal.style.display = 'none';
+    }
+
+    document.getElementById('openModalBtn').addEventListener('click', () => {
+      if (currentTab === 'prompts') {
+        document.getElementById('promptInputText').value = '';
+        document.getElementById('promptInputTitle').value = '';
+        document.getElementById('promptInputUrl').value = '';
+        document.getElementById('promptInputTags').value = '';
+        promptModal.style.display = 'flex';
+      } else {
+        document.getElementById('clipImageInput').value = '';
+        document.getElementById('clipImageData').value = '';
+        document.getElementById('clipUrlInput').value = '';
+        document.getElementById('clipMemoInput').value = '';
+        document.getElementById('dropLabel').textContent = 'スクショ・写真を選択';
+        document.getElementById('ocrStatus').style.display = 'none';
+        scannedOCRResult = null;
+        clipModal.style.display = 'flex';
+      }
+    });
+
+    // --- プロンプト保存 ---
+    document.getElementById('savePromptBtn').addEventListener('click', () => {
+      const text = document.getElementById('promptInputText').value.trim();
+      let title = document.getElementById('promptInputTitle').value.trim();
+      const url = document.getElementById('promptInputUrl').value.trim();
+      const tagsRaw = document.getElementById('promptInputTags').value.trim();
+
+      if (!text) {
+        alert('プロンプト本文を入力してください');
+        return;
+      }
+
+      if (!title) title = extractTitle(text);
+      let tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : extractPromptTags(text);
+
+      prompts.unshift({
+        id: Date.now().toString(),
+        title,
+        prompt: text,
+        tags,
+        url,
+        memo: '',
+        isFavorite: false,
+        createdAt: new Date().toISOString()
+      });
+
+      saveToStorage();
+      closeModals();
+    });
+
+    // --- スクショOCR文字解析 & SNS保存 ---
+    let scannedOCRResult = null;
+    const clipImageInput = document.getElementById('clipImageInput');
+    const clipImageData = document.getElementById('clipImageData');
+    const ocrStatus = document.getElementById('ocrStatus');
+    const dropLabel = document.getElementById('dropLabel');
+
+    clipImageInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      imageLabel.textContent = `✓ ${file.name.slice(0, 15)}...`;
+
+      dropLabel.textContent = `✓ ${file.name.slice(0, 15)}...`;
+      ocrStatus.style.display = 'block';
+
+      // 1. 画像圧縮 & Base64化
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const img = new Image();
-        img.onload = () => {
+        img.onload = async () => {
           const canvas = document.createElement('canvas');
-          const maxW = 700;
+          const maxW = 800;
           const scale = Math.min(1, maxW / img.width);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          imageDataField.value = canvas.toDataURL('image/jpeg', 0.72);
+          const base64 = canvas.toDataURL('image/jpeg', 0.75);
+          clipImageData.value = base64;
+
+          // 2. ブラウザ内OCR解析実行（日本語 + 英語）
+          try {
+            const result = await Tesseract.recognize(base64, 'jpn+eng');
+            scannedOCRResult = result.data.text;
+            ocrStatus.textContent = '✨ 解析完了！店名やタグを抽出しました';
+          } catch (err) {
+            console.error('OCR Error:', err);
+            ocrStatus.textContent = '※ 文字認識をスキップしました（画像のみ保存可能）';
+          }
         };
         img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     });
 
-    document.getElementById('openModalBtn').addEventListener('click', () => {
-      const isPrompt = (currentTab === 'prompts');
-      modalTitle.textContent = isPrompt ? 'プロンプト追加' : '投稿をストック';
-      modalHelper.textContent = isPrompt 
-        ? '本文だけ貼ればタイトル・タグを自動推定します！[変数] で穴埋め対応' 
-        : 'ツイートやキャプションを貼るだけで店名・県名・ショップを自動抽出！';
-      
-      modalText.value = '';
-      document.getElementById('modalTitleInput').value = '';
-      document.getElementById('modalUrl').value = '';
-      document.getElementById('modalTags').value = '';
-      imageInput.value = '';
-      imageDataField.value = '';
-      imageLabel.textContent = '📷 写真・スクショを選択 (推奨)';
-      
-      // 画像添付はSNSタブで前面推奨（プロンプト時も使用可能）
-      imageFieldGroup.style.display = 'block';
+    document.getElementById('saveClipBtn').addEventListener('click', () => {
+      const image = clipImageData.value;
+      const url = document.getElementById('clipUrlInput').value.trim();
+      const memo = document.getElementById('clipMemoInput').value.trim();
 
-      modal.style.display = 'flex';
-    });
-
-    document.getElementById('closeModalBtn').addEventListener('click', () => modal.style.display = 'none');
-
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      const isPrompt = (currentTab === 'prompts');
-      const textVal = modalText.value.trim();
-      let titleVal = document.getElementById('modalTitleInput').value.trim();
-      const tagsRaw = document.getElementById('modalTags').value.trim();
-      const url = document.getElementById('modalUrl').value.trim();
-      const image = imageDataField.value;
-
-      if (!textVal) {
-        alert('本文を入力してください');
+      if (!image && !url) {
+        alert('スクショを選ぶか、URLを入力してください');
         return;
       }
 
-      const metadata = extractMetadata(textVal, !isPrompt);
-      const title = titleVal || extractTitle(textVal);
+      let title = 'SNSクリップ';
+      let tags = ['SNS'];
+      let area = null;
+      let textContent = '';
 
-      let finalTags = metadata.tags;
-      if (tagsRaw) {
-        const userTags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
-        finalTags = Array.from(new Set([...finalTags, ...userTags]));
+      if (scannedOCRResult) {
+        textContent = scannedOCRResult.replace(/\s+/g, ' ').trim();
+        title = extractTitle(textContent);
+        const meta = extractMetadata(textContent);
+        tags = meta.tags;
+        area = meta.detectedArea;
+      } else if (url) {
+        // URLのみの場合
+        title = url.includes('instagram.com') ? 'Instagram投稿' : 'Xポスト';
       }
 
-      const newItem = {
+      clips.unshift({
         id: Date.now().toString(),
         title,
-        tags: finalTags,
+        text: '',
+        scannedText: textContent,
+        tags,
+        area,
         url,
         image,
-        memo: '',
+        memo,
         isFavorite: false,
         createdAt: new Date().toISOString()
-      };
+      });
 
-      if (isPrompt) {
-        newItem.prompt = textVal;
-        prompts.unshift(newItem);
-        localStorage.setItem(STORAGE_KEY_PROMPTS, JSON.stringify(prompts));
-      } else {
-        newItem.text = textVal;
-        newItem.area = metadata.detectedArea;
-        clips.unshift(newItem);
-        localStorage.setItem(STORAGE_KEY_CLIPS, JSON.stringify(clips));
-      }
-
-      render();
-      modal.style.display = 'none';
+      saveToStorage();
+      closeModals();
     });
 
-    // --- 7. バックアップ・復元 ---
-    const backupModal = document.getElementById('backupModal');
+    // --- バックアップ ---
     document.getElementById('backupBtn').addEventListener('click', () => backupModal.style.display = 'flex');
-    document.getElementById('closeBackupModalBtn').addEventListener('click', () => backupModal.style.display = 'none');
 
     document.getElementById('exportBtn').addEventListener('click', () => {
       const allData = { prompts, clips, exportedAt: new Date().toISOString() };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `all_stock_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      downloadAnchor.setAttribute("download", `stock_backup_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -1134,7 +1069,7 @@
         try {
           const imported = JSON.parse(event.target.result);
           if (imported.prompts || imported.clips) {
-            if (confirm('ファイルからデータを復元・統合しますか？')) {
+            if (confirm('データを復元・統合しますか？')) {
               if (Array.isArray(imported.prompts)) {
                 const curPIds = new Set(prompts.map(p => p.id));
                 imported.prompts.forEach(p => { if (!curPIds.has(p.id)) prompts.push(p); });
@@ -1146,11 +1081,9 @@
                 localStorage.setItem(STORAGE_KEY_CLIPS, JSON.stringify(clips));
               }
               render();
-              backupModal.style.display = 'none';
-              alert('復元が完了しました！');
+              closeModals();
+              alert('復元完了しました！');
             }
-          } else {
-            alert('データの形式が正しくありません');
           }
         } catch (err) {
           alert('ファイルの読み込みに失敗しました');
