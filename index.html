@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Stock</title>
+  <style>
+    /* ===================================================
+       1. ダークモード（黒背景・ネオン系）
+       =================================================== */
+    :root[data-theme="dark"] {
+      --bg-base: #181824;
+      --bg-surface: #222233;
+      --bg-subtle: #12121c;
+      --text-main: #F5F5FA;
+      --text-muted: #A3A3C2;
+      
+      --color-1: #8587F8;          /* パープルブルー：サブアクセント、枠線、見出し */
+      --color-2: #FB76FB;          /* ネオンライトピンク：ボタン、リンク、FAB */
+      --color-3: #EC1278;          /* ビビッドマゼンタ：重要アクション、強調 */
+
+      --btn-text-primary: #181824;
+      --border-color: rgba(133, 135, 248, 0.25);
+    }
+
+    /* ===================================================
+       2. ライトモード（白背景・ロマンティック系）
+       =================================================== */
+    :root[data-theme="light"] {
+      --bg-base: #FAF9FD;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F3F1FA;
+      --text-main: #2E2979;
+      --text-muted: #6C66A6;
+      
+      --color-1: #2E2979;          /* ダークネイビー：見出し、輪郭 */
+      --color-2: #F39DF4;          /* 明るいピンクパープル：ボタン */
+      --color-3: #9B95EB;          /* ラベンダー：サブボタン、タグ、境界線 */
+
+      --btn-text-primary: #2E2979;
+      --border-color: rgba(155, 149, 235, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      padding: 16px;
+      padding-bottom: 96px;
+      min-height: 100vh;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-1);
+      letter-spacing: 0.5px;
+    }
+
+    .count-badge {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .theme-toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+      outline: none;
+    }
+    .search-box:focus {
+      border-color: var(--color-2);
+    }
+    .search-box::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--bg-subtle);
+      color: var(--color-1);
+      padding: 3px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .prompt-box {
+      background: var(--bg-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 120px;
+      overflow-y: auto;
+      border: 1px dashed var(--border-color);
+    }
+
+    /* メモ・コメント表示エリア */
+    .memo-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .note-box {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: var(--text-muted);
+      background: var(--bg-subtle);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border-left: 3.5px solid var(--color-3);
+      white-space: pre-wrap;
+    }
+
+    .memo-editor {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .memo-textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .memo-editor-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .btn-memo-action {
+      background: none;
+      border: none;
+      color: var(--color-1);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 4px;
+    }
+    .btn-memo-action:hover {
+      text-decoration: underline;
+    }
+
+    /* アクション */
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .card-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .x-link {
+      color: var(--color-2);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .x-link:hover {
+      text-decoration: underline;
+    }
+
+    .btn {
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: transform 0.15s;
+    }
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-copy {
+      background: var(--color-2);
+      color: var(--btn-text-primary);
+      box-shadow: 0 2px 8px rgba(243, 157, 244, 0.25);
+    }
+
+    .btn-delete {
+      background: transparent;
+      color: var(--color-3);
+      border: 1px solid var(--color-3);
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 22px;
+      right: 20px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--color-2);
+      color: var(--btn-text-primary);
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      z-index: 50;
+    }
+    .fab:active {
+      transform: scale(0.92);
+    }
+
+    /* モーダル */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 16, 0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-color);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+    .modal h2 {
+      font-size: 1.15rem;
+      color: var(--color-1);
+    }
+    .helper-text {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: -6px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: var(--color-2);
+    }
+    textarea.input-field {
+      resize: vertical;
+      min-height: 90px;
+    }
+    .modal-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .btn-save {
+      background: var(--color-2);
+      color: var(--btn-text-primary);
+    }
+    .btn-secondary {
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-area">
+      <h1>Prompt Stock</h1>
+      <span id="count" class="count-badge">0 items</span>
+    </div>
+    <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="テーマ切り替え">
+      <span id="themeIcon">☀️</span>
+      <span id="themeLabel">Light</span>
+    </button>
+  </header>
+
+  <input type="text" id="search" class="search-box" placeholder="タイトル・タグ・本文・メモから検索...">
+
+  <div id="cardList" class="card-list"></div>
+
+  <button class="fab" id="openModalBtn" aria-label="新規プロンプト作成">＋</button>
+
+  <!-- 投稿用モーダル -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2>プロンプト追加</h2>
+      <p class="helper-text">※プロンプト本文だけ貼れば、タイトルやタグは自動抽出されます</p>
+      <textarea id="promptText" class="input-field" placeholder="プロンプト本文を貼り付け（必須）..." rows="5" required></textarea>
+      <input type="text" id="title" class="input-field" placeholder="タイトル（空欄で自動抽出）">
+      <input type="text" id="tags" class="input-field" placeholder="タグ（空欄で自動抽出 / カンマ区切り）">
+      <input type="url" id="sourceUrl" class="input-field" placeholder="参考URL（Xのリンクなど）">
+      <div class="modal-btns">
+        <button class="btn btn-secondary" id="closeModalBtn">キャンセル</button>
+        <button class="btn btn-save" id="saveBtn">保存する</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- テーマ設定 ---
+    const THEME_KEY = 'prompt_stock_theme';
+    const htmlEl = document.documentElement;
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+
+    function applyTheme(theme) {
+      htmlEl.setAttribute('data-theme', theme);
+      localStorage.setItem(THEME_KEY, theme);
+      if (theme === 'dark') {
+        themeIcon.textContent = '☀️';
+        themeLabel.textContent = 'Light';
+      } else {
+        themeIcon.textContent = '🌙';
+        themeLabel.textContent = 'Dark';
+      }
+    }
+
+    const currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
+    applyTheme(currentTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const nextTheme = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme);
+    });
+
+    // --- 自動抽出ロジック ---
+    function extractTitle(text) {
+      const firstLine = text.trim().split('\n')[0].replace(/^[#\-*>\s]+/, '').trim();
+      return firstLine.length > 30 ? firstLine.slice(0, 30) + '…' : firstLine || '無題のプロンプト';
+    }
+
+    function extractTags(text) {
+      const dict = [
+        { word: /midjourney|niji/i, tag: 'Midjourney' },
+        { word: /dall[- ]?e/i, tag: 'DALL-E' },
+        { word: /stable diffusion/i, tag: 'StableDiffusion' },
+        { word: /イラスト|画像|作画|背景|ポートレート|キャラクター/i, tag: '画像生成' },
+        { word: /小説|ストーリー|台本|シナリオ|執筆|会話/i, tag: '文章・創作' },
+        { word: /要約|校正|リライト|翻訳/i, tag: '編集・要約' },
+        { word: /html|css|javascript|python|コード|プログラミング/i, tag: 'コード' },
+        { word: /アイデア|ブレスト|企画/i, tag: 'アイデア' }
+      ];
+      const tags = [];
+      dict.forEach(item => {
+        if (item.word.test(text)) {
+          tags.push(item.tag);
+        }
+      });
+      return tags.length > 0 ? tags : ['プロンプト'];
+    }
+
+    // --- データ保存・描画 ---
+    const STORAGE_KEY = 'my_prompts_data';
+    let prompts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    const cardList = document.getElementById('cardList');
+    const searchInput = document.getElementById('search');
+    const countDisplay = document.getElementById('count');
+    const modal = document.getElementById('modal');
+
+    function saveToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
+      render();
+    }
+
+    function copyToClipboard(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = '✓ 完了';
+        setTimeout(() => { btn.textContent = originalText; }, 1400);
+      });
+    }
+
+    window.deletePrompt = function(id) {
+      if (confirm('このプロンプトを削除しますか？')) {
+        prompts = prompts.filter(p => p.id !== id);
+        saveToStorage();
+      }
+    };
+
+    window.updateMemo = function(id, newMemo) {
+      const item = prompts.find(p => p.id === id);
+      if (item) {
+        item.memo = newMemo.trim();
+        saveToStorage();
+      }
+    };
+
+    function render() {
+      const keyword = searchInput.value.toLowerCase();
+      const filtered = prompts.filter(p => 
+        p.title.toLowerCase().includes(keyword) ||
+        p.prompt.toLowerCase().includes(keyword) ||
+        p.tags.some(t => t.toLowerCase().includes(keyword)) ||
+        (p.memo && p.memo.toLowerCase().includes(keyword))
+      );
+
+      countDisplay.textContent = `${filtered.length} items`;
+      cardList.innerHTML = '';
+
+      if (filtered.length === 0) {
+        cardList.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); margin-top: 48px; font-size: 0.9rem;">
+            登録されたプロンプトがありません<br>右下の「＋」からストックを追加できます
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const tagElements = p.tags.map(t => `<span class="tag">#${t}</span>`).join('');
+        const urlElement = p.url ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer" class="x-link">🔗 元リンク</a>` : '';
+
+        card.innerHTML = `
+          <div class="card-header">
+            <div class="card-title">${p.title}</div>
+            <button class="btn-delete" onclick="deletePrompt('${p.id}')">削除</button>
+          </div>
+          ${tagElements ? `<div class="tags">${tagElements}</div>` : ''}
+          <div class="prompt-box">${p.prompt}</div>
+
+          <!-- メモ・コメントセクション -->
+          <div class="memo-section">
+            ${p.memo ? `<div class="note-box" id="noteView-${p.id}">💬 ${p.memo}</div>` : ''}
+            <button class="btn-memo-action" id="openMemoBtn-${p.id}">
+              ${p.memo ? '✏️ メモ・使い勝手を編集' : '＋ メモ・コメントを書く'}
+            </button>
+            <div class="memo-editor" id="memoEditor-${p.id}">
+              <textarea class="memo-textarea" id="memoInput-${p.id}" placeholder="使い勝手や気付きをメモ...">${p.memo || ''}</textarea>
+              <div class="memo-editor-btns">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" id="cancelMemoBtn-${p.id}">キャンセル</button>
+                <button class="btn btn-save" style="padding: 4px 10px; font-size: 0.75rem;" id="saveMemoBtn-${p.id}">メモ保存</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="card-links">${urlElement}</div>
+            <button class="btn btn-copy copy-btn">📋 コピー</button>
+          </div>
+        `;
+
+        // コピーイベント
+        card.querySelector('.copy-btn').addEventListener('click', (e) => copyToClipboard(p.prompt, e.target));
+
+        // メモ編集トグル
+        const openMemoBtn = card.querySelector(`#openMemoBtn-${p.id}`);
+        const memoEditor = card.querySelector(`#memoEditor-${p.id}`);
+        const cancelMemoBtn = card.querySelector(`#cancelMemoBtn-${p.id}`);
+        const saveMemoBtn = card.querySelector(`#saveMemoBtn-${p.id}`);
+        const memoInput = card.querySelector(`#memoInput-${p.id}`);
+
+        openMemoBtn.addEventListener('click', () => {
+          memoEditor.style.display = 'flex';
+          openMemoBtn.style.display = 'none';
+          memoInput.focus();
+        });
+
+        cancelMemoBtn.addEventListener('click', () => {
+          memoEditor.style.display = 'none';
+          openMemoBtn.style.display = 'inline-flex';
+          memoInput.value = p.memo || '';
+        });
+
+        saveMemoBtn.addEventListener('click', () => {
+          updateMemo(p.id, memoInput.value);
+        });
+
+        cardList.appendChild(card);
+      });
+    }
+
+    // モーダル開閉
+    document.getElementById('openModalBtn').addEventListener('click', () => modal.style.display = 'flex');
+    document.getElementById('closeModalBtn').addEventListener('click', () => modal.style.display = 'none');
+
+    // 新規登録
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const promptText = document.getElementById('promptText').value.trim();
+      let title = document.getElementById('title').value.trim();
+      const tagsRaw = document.getElementById('tags').value.trim();
+      const url = document.getElementById('sourceUrl').value.trim();
+
+      if (!promptText) {
+        alert('プロンプト本文を入力してください');
+        return;
+      }
+
+      // 未入力なら自動抽出
+      if (!title) {
+        title = extractTitle(promptText);
+      }
+
+      let tags = [];
+      if (tagsRaw) {
+        tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+      } else {
+        tags = extractTags(promptText);
+      }
+
+      prompts.unshift({
+        id: Date.now().toString(),
+        title,
+        prompt: promptText,
+        tags,
+        url,
+        memo: '', // メモはあとから追加
+        createdAt: new Date().toISOString()
+      });
+
+      saveToStorage();
+
+      // リセット
+      document.getElementById('title').value = '';
+      document.getElementById('promptText').value = '';
+      document.getElementById('tags').value = '';
+      document.getElementById('sourceUrl').value = '';
+      modal.style.display = 'none';
+    });
+
+    searchInput.addEventListener('input', render);
+
+    // 初回描画
+    render();
+  </script>
+</body>
+</html>
