@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Prompt Stock</title>
+  <title>Stock App</title>
   
-  <!-- PWA・ホーム画面アプリ化対応 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,7 +21,7 @@
       --text-muted: #A3A3C2;
       
       --color-1: #8587F8;          /* パープルブルー */
-      --color-2: #FB76FB;          /* ネオンライトピンク */
+      --color-2: #FB76FB;          /* ネオンピンク */
       --color-3: #EC1278;          /* ビビッドマゼンタ */
 
       --btn-text-primary: #181824;
@@ -59,7 +58,7 @@
       background-color: var(--bg-base);
       color: var(--text-main);
       padding: 16px;
-      padding-bottom: 96px;
+      padding-bottom: 110px; /* ボトムバーの分 */
       min-height: 100vh;
     }
 
@@ -110,7 +109,7 @@
     }
     .icon-btn:active { transform: scale(0.96); }
 
-    /* コントロールバー（検索 + ソート） */
+    /* コントロール */
     .controls {
       display: flex;
       gap: 8px;
@@ -130,18 +129,7 @@
     .search-box:focus { border-color: var(--color-2); }
     .search-box::placeholder { color: var(--text-muted); opacity: 0.8; }
 
-    .sort-select {
-      background: var(--bg-surface);
-      border: 1.5px solid var(--border-color);
-      color: var(--text-main);
-      padding: 0 10px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      outline: none;
-    }
-
-    /* タグ・フォルダ横スクロールバー */
+    /* 横スクロールタグ */
     .category-scroll {
       display: flex;
       gap: 8px;
@@ -166,7 +154,6 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      transition: all 0.2s ease;
     }
     .cat-chip.active {
       background: var(--color-2);
@@ -176,26 +163,32 @@
     }
     .cat-count { font-size: 0.7rem; opacity: 0.85; }
 
-    /* プロンプトカード一覧 */
+    /* カード共通 */
     .card-list {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
     .card {
       background: var(--bg-surface);
       border: 1.5px solid var(--border-color);
-      border-radius: 14px;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .card.is-favorite {
+      border-color: var(--color-2);
+    }
+
+    .card-body {
       padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      position: relative;
-    }
-    .card.is-favorite {
-      border-color: var(--color-2);
     }
 
     .card-header {
@@ -214,10 +207,9 @@
 
     .fav-star {
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       color: var(--text-muted);
       user-select: none;
-      transition: transform 0.15s;
     }
     .fav-star.active {
       color: #ffb703;
@@ -226,26 +218,10 @@
 
     .card-title {
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 1.05rem;
       color: var(--text-main);
       word-break: break-all;
     }
-
-    .card-header-btns {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .btn-icon-sub {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.85rem;
-      padding: 2px;
-    }
-    .btn-icon-sub:hover { color: var(--color-1); }
 
     .tags {
       display: flex;
@@ -263,14 +239,32 @@
       border: 1px solid var(--border-color);
       cursor: pointer;
     }
+    .tag-brand { color: var(--color-2); border-color: var(--color-2); }
+    .tag-area { color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); }
+
+    /* プロンプト・SNS本文ボックス */
+    .content-box {
+      background: var(--bg-subtle);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 110px;
+      overflow-y: auto;
+      border: 1px dashed var(--border-color);
+    }
+    .content-box.code-font {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
 
     /* 画像プレビュー */
     .card-image-wrap {
       width: 100%;
-      max-height: 180px;
-      border-radius: 8px;
+      max-height: 240px;
       overflow: hidden;
-      border: 1px solid var(--border-color);
       background: #000;
       display: flex;
       justify-content: center;
@@ -282,22 +276,7 @@
       object-fit: cover;
     }
 
-    .prompt-box {
-      background: var(--bg-subtle);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.85rem;
-      line-height: 1.45;
-      color: var(--text-main);
-      white-space: pre-wrap;
-      word-break: break-all;
-      max-height: 110px;
-      overflow-y: auto;
-      border: 1px dashed var(--border-color);
-    }
-
-    /* 変数プレースホルダー置換フォーム */
+    /* 変数プレースホルダー置換 */
     .variable-container {
       background: rgba(133, 135, 248, 0.08);
       border: 1px solid var(--border-color);
@@ -328,7 +307,7 @@
     }
     .var-field:focus { border-color: var(--color-2); }
 
-    /* メモ・コメントセクション */
+    /* メモ */
     .memo-section {
       display: flex;
       flex-direction: column;
@@ -361,11 +340,6 @@
       resize: vertical;
       min-height: 55px;
     }
-    .memo-editor-btns {
-      display: flex;
-      justify-content: flex-end;
-      gap: 6px;
-    }
     .btn-memo-action {
       background: none;
       border: none;
@@ -377,7 +351,6 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 2px;
     }
 
     /* アクション */
@@ -386,23 +359,26 @@
       justify-content: space-between;
       align-items: center;
       margin-top: 2px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(133, 135, 248, 0.12);
     }
-    .card-links {
+
+    .link-group {
       display: flex;
       gap: 10px;
       align-items: center;
-      font-size: 0.78rem;
-      color: var(--text-muted);
     }
-    .x-link {
-      color: var(--color-2);
+
+    .action-link {
       font-size: 0.82rem;
       font-weight: 600;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
     }
+    .link-sns { color: var(--color-2); }
+    .link-map { color: #38bdf8; }
 
     .btn {
       border: none;
@@ -425,9 +401,19 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
+    .btn-delete-card {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .btn-delete-card:hover { color: var(--color-3); }
+
+    /* フローティング追加ボタン */
     .fab {
       position: fixed;
-      bottom: 22px;
+      bottom: 74px; /* ボトムバーの上 */
       right: 20px;
       width: 56px;
       height: 56px;
@@ -444,6 +430,46 @@
       z-index: 50;
     }
     .fab:active { transform: scale(0.92); }
+
+    /* 下部ボトムナビゲーション */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--bg-surface);
+      border-top: 1.5px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 60;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-item {
+      flex: 1;
+      height: 100%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .nav-item.active {
+      color: var(--color-2);
+    }
+    .nav-icon {
+      font-size: 1.25rem;
+    }
 
     /* モーダル */
     .modal-overlay {
@@ -471,7 +497,7 @@
       overflow-y: auto;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     }
-    .modal h2 { font-size: 1.1rem; color: var(--color-1); }
+    .modal h2 { font-size: 1.15rem; color: var(--color-1); }
     .helper-text { font-size: 0.75rem; color: var(--text-muted); margin-top: -6px; }
 
     .input-field {
@@ -485,14 +511,17 @@
       outline: none;
     }
     .input-field:focus { border-color: var(--color-2); }
-    textarea.input-field { resize: vertical; min-height: 85px; }
+    textarea.input-field { resize: vertical; min-height: 90px; }
 
-    .file-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .file-input-box {
+      background: var(--bg-subtle);
+      border: 1.5px dashed var(--border-color);
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
       font-size: 0.8rem;
       color: var(--text-muted);
+      cursor: pointer;
     }
 
     .modal-btns {
@@ -503,14 +532,13 @@
     }
     .btn-save { background: var(--color-2); color: var(--btn-text-primary); }
     .btn-secondary { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border-color); }
-    .btn-delete-full { background: transparent; color: var(--color-3); border: 1px solid var(--color-3); }
   </style>
 </head>
 <body>
 
   <header>
     <div class="logo-area">
-      <h1>Prompt Stock</h1>
+      <h1 id="appTitle">Prompt Stock</h1>
       <span id="count" class="count-badge">0 items</span>
     </div>
     <div class="header-actions">
@@ -521,45 +549,54 @@
     </div>
   </header>
 
-  <!-- 検索 & 並び替えバー -->
+  <!-- 検索バー -->
   <div class="controls">
     <input type="text" id="search" class="search-box" placeholder="キーワード検索...">
-    <select id="sortSelect" class="sort-select">
-      <option value="newest">新しい順</option>
-      <option value="popular">使用回数順</option>
-      <option value="recent">最近使った順</option>
-    </select>
   </div>
 
-  <!-- タグ・フォルダ横スクロールバー -->
+  <!-- 横スクロールタグフィルター -->
   <div id="categoryFilter" class="category-scroll"></div>
 
-  <!-- カード一覧 -->
+  <!-- カード一覧表示エリア -->
   <div id="cardList" class="card-list"></div>
 
   <!-- 新規作成ボタン -->
-  <button class="fab" id="openModalBtn" aria-label="新規プロンプト作成">＋</button>
+  <button class="fab" id="openModalBtn" aria-label="新規作成">＋</button>
 
-  <!-- プロンプト追加・編集モーダル -->
+  <!-- 下部ボトムナビゲーション -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="tabPrompts">
+      <span class="nav-icon">💬</span>
+      <span>プロンプト</span>
+    </button>
+    <button class="nav-item" id="tabClips">
+      <span class="nav-icon">📌</span>
+      <span>SNS・お出かけ</span>
+    </button>
+  </nav>
+
+  <!-- モーダル（共通フォーム） -->
   <div class="modal-overlay" id="modal">
     <div class="modal">
       <h2 id="modalTitle">プロンプト追加</h2>
-      <p class="helper-text">※本文だけ貼ればタイトルやタグを自動推定します。[変数名] で穴埋め可能！</p>
+      <p class="helper-text" id="modalHelper">本文を貼るだけでタイトルやタグを自動推定します！</p>
       
-      <input type="hidden" id="editId">
-      <textarea id="promptText" class="input-field" placeholder="プロンプト本文（必須）... 例: [髪色]のショートヘアの女の子" rows="5" required></textarea>
-      <input type="text" id="title" class="input-field" placeholder="タイトル（空欄で自動抽出）">
-      <input type="text" id="tags" class="input-field" placeholder="タグ（カンマ区切り / 空欄で自動抽出）">
-      <input type="url" id="sourceUrl" class="input-field" placeholder="参考URL（Xのリンクなど）">
+      <textarea id="modalText" class="input-field" placeholder="本文（必須）..." rows="5" required></textarea>
+      <input type="text" id="modalTitleInput" class="input-field" placeholder="タイトル（空欄で自動抽出）">
+      <input type="url" id="modalUrl" class="input-field" placeholder="参考URL（Xやインスタのリンクなど）">
       
-      <div class="file-input-wrap">
-        <label>🖼️ 生成結果画像 (任意):</label>
-        <input type="file" id="imageInput" accept="image/*">
+      <!-- SNSタブの時だけ表示される画像フィールド -->
+      <div id="imageFieldGroup">
+        <label class="file-input-box" for="imageInput">
+          <span id="imageLabel">📷 写真・スクショを選択 (推奨)</span>
+          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        </label>
+        <input type="hidden" id="imageData">
       </div>
-      <input type="hidden" id="imageData">
+
+      <input type="text" id="modalTags" class="input-field" placeholder="タグ（カンマ区切り / 空欄で自動抽出）">
 
       <div class="modal-btns">
-        <button class="btn btn-delete-full" id="deleteBtnModal" style="display: none; margin-right: auto;">削除</button>
         <button class="btn btn-secondary" id="closeModalBtn">キャンセル</button>
         <button class="btn btn-save" id="saveBtn">保存する</button>
       </div>
@@ -570,7 +607,7 @@
   <div class="modal-overlay" id="backupModal">
     <div class="modal">
       <h2>データ管理・バックアップ</h2>
-      <p class="helper-text">端末変更やブラウザの履歴削除対策に、データをファイル保存しておけます。</p>
+      <p class="helper-text">プロンプトとSNSクリップの全データをファイル保存・復元できます。</p>
       
       <button class="btn btn-save" id="exportBtn" style="width: 100%; padding: 10px;">📤 データを書き出す (JSON保存)</button>
       
@@ -587,7 +624,7 @@
 
   <script>
     // --- 1. テーマ設定 ---
-    const THEME_KEY = 'prompt_stock_theme';
+    const THEME_KEY = 'unified_stock_theme';
     const htmlEl = document.documentElement;
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const themeIcon = document.getElementById('themeIcon');
@@ -606,28 +643,74 @@
       applyTheme(nextTheme);
     });
 
-    // --- 2. 自動抽出ロジック ---
+    // --- 2. 自動抽出ルール ---
+    const BRAND_RULES = [
+      { name: '無印良品', regex: /無印良品|無印/i },
+      { name: 'ダイソー', regex: /ダイソー|daiso/i },
+      { name: 'セリア', regex: /セリア|seria/i },
+      { name: 'キャンドゥ', regex: /キャンドゥ|cando/i },
+      { name: '3COINS', regex: /スリコ|3coins/i },
+      { name: 'カルディ', regex: /カルディ|kaldi/i },
+      { name: 'セブンイレブン', regex: /セブン[-ー]?イレブン|セブン/i },
+      { name: 'ローソン', regex: /ローソン|lawson/i },
+      { name: 'ファミリーマート', regex: /ファミリーマート|ファミマ/i },
+      { name: 'GU', regex: /gu|ジーユー/i },
+      { name: 'ユニクロ', regex: /ユニクロ|uniqlo/i }
+    ];
+
+    const GENRE_RULES = [
+      { name: 'カフェ・グルメ', regex: /カフェ|スイーツ|ランチ|ディナー|グルメ|美味しい|パン屋|ラーメン|居酒屋|喫茶/i },
+      { name: '美容・コスメ', regex: /コスメ|スキンケア|メイク|リップ|アイシャドウ|美容液|パック|プチプラコスメ|垢抜け/i },
+      { name: 'お出かけ・旅', regex: /ホテル|旅行|観光|お出かけ|絶景|デートスポット|旅館|日帰り/i },
+      { name: '雑貨・便利グッズ', regex: /便利グッズ|収納|神コスパ|キッチングッズ|インテリア/i }
+    ];
+
+    const PREFECTURES = [
+      "東京", "新宿", "渋谷", "銀座", "表参道", "浅草", "吉祥寺",
+      "神奈川", "横浜", "鎌倉", "箱根", "埼玉", "千葉", "大阪", "梅田", "難波",
+      "京都", "兵庫", "神戸", "福岡", "博多", "北海道", "沖縄", "愛知", "名古屋"
+    ];
+
+    const PROMPT_RULES = [
+      { word: /midjourney|niji/i, tag: 'Midjourney' },
+      { word: /dall[- ]?e/i, tag: 'DALL-E' },
+      { word: /stable diffusion/i, tag: 'StableDiffusion' },
+      { word: /イラスト|画像|作画|背景|ポートレート|キャラクター/i, tag: '画像生成' },
+      { word: /小説|ストーリー|台本|シナリオ|執筆|会話/i, tag: '文章・創作' },
+      { word: /要約|校正|リライト|翻訳/i, tag: '編集・要約' },
+      { word: /html|css|javascript|python|コード|プログラミング/i, tag: 'コード' },
+      { word: /アイデア|ブレスト|企画/i, tag: 'アイデア' }
+    ];
+
     function extractTitle(text) {
+      const bracketMatch = text.match(/[【『「](.*?)[】』」]/);
+      if (bracketMatch && bracketMatch[1].length <= 25) {
+        return bracketMatch[1];
+      }
       const firstLine = text.trim().split('\n')[0].replace(/^[#\-*>\s]+/, '').trim();
-      return firstLine.length > 30 ? firstLine.slice(0, 30) + '…' : firstLine || '無題のプロンプト';
+      return firstLine.length > 25 ? firstLine.slice(0, 25) + '…' : firstLine || '無題';
     }
 
-    function extractTags(text) {
-      const dict = [
-        { word: /midjourney|niji/i, tag: 'Midjourney' },
-        { word: /dall[- ]?e/i, tag: 'DALL-E' },
-        { word: /stable diffusion/i, tag: 'StableDiffusion' },
-        { word: /イラスト|画像|作画|背景|ポートレート|キャラクター/i, tag: '画像生成' },
-        { word: /小説|ストーリー|台本|シナリオ|執筆|会話/i, tag: '文章・創作' },
-        { word: /要約|校正|リライト|翻訳/i, tag: '編集・要約' },
-        { word: /html|css|javascript|python|コード|プログラミング/i, tag: 'コード' },
-        { word: /アイデア|ブレスト|企画/i, tag: 'アイデア' }
-      ];
-      const tags = [];
-      dict.forEach(item => {
-        if (item.word.test(text)) tags.push(item.tag);
-      });
-      return tags.length > 0 ? tags : ['プロンプト'];
+    function extractMetadata(text, isClip = false) {
+      const tags = new Set();
+      let detectedArea = null;
+
+      if (isClip) {
+        BRAND_RULES.forEach(b => { if (b.regex.test(text)) tags.add(b.name); });
+        GENRE_RULES.forEach(g => { if (g.regex.test(text)) tags.add(g.name); });
+        for (const pref of PREFECTURES) {
+          if (text.includes(pref)) {
+            tags.add(pref);
+            if (!detectedArea) detectedArea = pref;
+          }
+        }
+        if (tags.size === 0) tags.add('気になる');
+      } else {
+        PROMPT_RULES.forEach(p => { if (p.word.test(text)) tags.add(p.tag); });
+        if (tags.size === 0) tags.add('プロンプト');
+      }
+
+      return { tags: Array.from(tags), detectedArea };
     }
 
     function extractVariables(text) {
@@ -636,58 +719,62 @@
       return [...new Set(matches.map(m => m.slice(1, -1)))];
     }
 
-    // --- 3. データ管理 ---
-    const STORAGE_KEY = 'my_prompts_data';
-    let prompts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    // --- 3. データと状態管理 ---
+    const STORAGE_KEY_PROMPTS = 'my_prompts_data';
+    const STORAGE_KEY_CLIPS = 'my_sns_clips_data';
+
+    let prompts = JSON.parse(localStorage.getItem(STORAGE_KEY_PROMPTS) || '[]');
+    let clips = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIPS) || '[]');
+
+    let currentTab = 'prompts'; // 'prompts' | 'clips'
     let selectedTag = 'ALL';
-    let currentSort = 'newest';
 
     const cardList = document.getElementById('cardList');
     const categoryFilter = document.getElementById('categoryFilter');
     const searchInput = document.getElementById('search');
-    const sortSelect = document.getElementById('sortSelect');
     const countDisplay = document.getElementById('count');
-    const modal = document.getElementById('modal');
+    const appTitle = document.getElementById('appTitle');
 
     function saveToStorage() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
+      if (currentTab === 'prompts') {
+        localStorage.setItem(STORAGE_KEY_PROMPTS, JSON.stringify(prompts));
+      } else {
+        localStorage.setItem(STORAGE_KEY_CLIPS, JSON.stringify(clips));
+      }
       render();
     }
 
-    function copyToClipboard(text, btn, promptId) {
+    function copyToClipboard(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         const originalText = btn.textContent;
         btn.textContent = '✓ 完了';
         setTimeout(() => { btn.textContent = originalText; }, 1400);
-
-        // 使用回数 & 最終使用日時更新
-        const item = prompts.find(p => p.id === promptId);
-        if (item) {
-          item.usedCount = (item.usedCount || 0) + 1;
-          item.lastUsedAt = new Date().toISOString();
-          saveToStorage();
-        }
       });
     }
 
     window.toggleFavorite = function(id) {
-      const item = prompts.find(p => p.id === id);
+      const list = (currentTab === 'prompts') ? prompts : clips;
+      const item = list.find(x => x.id === id);
       if (item) {
         item.isFavorite = !item.isFavorite;
         saveToStorage();
       }
     };
 
-    window.deletePrompt = function(id) {
-      if (confirm('このプロンプトを削除しますか？')) {
-        prompts = prompts.filter(p => p.id !== id);
+    window.deleteItem = function(id) {
+      if (confirm('削除しますか？')) {
+        if (currentTab === 'prompts') {
+          prompts = prompts.filter(x => x.id !== id);
+        } else {
+          clips = clips.filter(x => x.id !== id);
+        }
         saveToStorage();
-        modal.style.display = 'none';
       }
     };
 
     window.updateMemo = function(id, newMemo) {
-      const item = prompts.find(p => p.id === id);
+      const list = (currentTab === 'prompts') ? prompts : clips;
+      const item = list.find(x => x.id === id);
       if (item) {
         item.memo = newMemo.trim();
         saveToStorage();
@@ -695,10 +782,10 @@
     };
 
     // --- 4. 描画処理 ---
-    function renderCategoryBar() {
+    function renderCategoryBar(currentList) {
       const tagCounts = {};
-      prompts.forEach(p => {
-        p.tags.forEach(t => {
+      currentList.forEach(item => {
+        item.tags.forEach(t => {
           tagCounts[t] = (tagCounts[t] || 0) + 1;
         });
       });
@@ -712,7 +799,7 @@
 
       const allChip = document.createElement('button');
       allChip.className = `cat-chip ${selectedTag === 'ALL' ? 'active' : ''}`;
-      allChip.innerHTML = `すべて <span class="cat-count">(${prompts.length})</span>`;
+      allChip.innerHTML = `すべて <span class="cat-count">(${currentList.length})</span>`;
       allChip.addEventListener('click', () => { selectedTag = 'ALL'; render(); });
       categoryFilter.appendChild(allChip);
 
@@ -729,32 +816,31 @@
     }
 
     function render() {
-      renderCategoryBar();
+      const isPrompt = (currentTab === 'prompts');
+      const currentList = isPrompt ? prompts : clips;
+
+      appTitle.textContent = isPrompt ? 'Prompt Stock' : 'Clip Stock';
+      searchInput.placeholder = isPrompt ? 'プロンプト・タグ・メモから検索...' : '店名・エリア・商品・メモから検索...';
+
+      renderCategoryBar(currentList);
 
       const keyword = searchInput.value.toLowerCase();
-      let filtered = prompts.filter(p => {
-        const matchesTag = (selectedTag === 'ALL') || p.tags.includes(selectedTag);
+      let filtered = currentList.filter(item => {
+        const matchesTag = (selectedTag === 'ALL') || item.tags.includes(selectedTag);
+        const textToSearch = isPrompt ? item.prompt : item.text;
         const matchesKeyword = 
-          p.title.toLowerCase().includes(keyword) ||
-          p.prompt.toLowerCase().includes(keyword) ||
-          p.tags.some(t => t.toLowerCase().includes(keyword)) ||
-          (p.memo && p.memo.toLowerCase().includes(keyword));
+          item.title.toLowerCase().includes(keyword) ||
+          textToSearch.toLowerCase().includes(keyword) ||
+          item.tags.some(t => t.toLowerCase().includes(keyword)) ||
+          (item.memo && item.memo.toLowerCase().includes(keyword));
         return matchesTag && matchesKeyword;
       });
 
-      // 並び替えロジック
+      // お気に入り優先ソート
       filtered.sort((a, b) => {
-        // お気に入りは最優先
         if (a.isFavorite && !b.isFavorite) return -1;
         if (!a.isFavorite && b.isFavorite) return 1;
-
-        if (currentSort === 'popular') {
-          return (b.usedCount || 0) - (a.usedCount || 0);
-        } else if (currentSort === 'recent') {
-          return new Date(b.lastUsedAt || 0) - new Date(a.lastUsedAt || 0);
-        } else {
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        }
+        return new Date(b.createdAt) - new Date(a.createdAt);
       });
 
       countDisplay.textContent = `${filtered.length} items`;
@@ -763,92 +849,114 @@
       if (filtered.length === 0) {
         cardList.innerHTML = `
           <div style="text-align: center; color: var(--text-muted); margin-top: 48px; font-size: 0.9rem;">
-            プロンプトが見つかりませんでした
+            ${isPrompt ? 'プロンプトがありません' : 'クリップがありません'}<br>右下の「＋」からストックを追加してみましょう！
           </div>
         `;
         return;
       }
 
-      filtered.forEach(p => {
+      filtered.forEach(item => {
         const card = document.createElement('div');
-        card.className = `card ${p.isFavorite ? 'is-favorite' : ''}`;
+        card.className = `card ${item.isFavorite ? 'is-favorite' : ''}`;
 
-        const tagElements = p.tags.map(t => `<span class="tag" onclick="selectSingleTag('${t}')">#${t}</span>`).join('');
-        const urlElement = p.url ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer" class="x-link">🔗 元ポスト</a>` : '';
-        const imageElement = p.image ? `<div class="card-image-wrap"><img src="${p.image}" class="card-image" alt="結果画像"></div>` : '';
+        // タグ整形
+        const tagElements = item.tags.map(t => {
+          const isBrand = BRAND_RULES.some(b => b.name === t);
+          const isArea = PREFECTURES.includes(t);
+          let extraClass = isBrand ? 'tag-brand' : (isArea ? 'tag-area' : '');
+          return `<span class="tag ${extraClass}" onclick="selectSingleTag('${t}')">#${t}</span>`;
+        }).join('');
 
-        // 変数フォーム生成
-        const vars = extractVariables(p.prompt);
+        // 画像
+        const imageElement = item.image 
+          ? `<div class="card-image-wrap"><img src="${item.image}" class="card-image" alt="画像"></div>` 
+          : '';
+
+        // プロンプト用変数
         let varFormHtml = '';
-        if (vars.length > 0) {
-          const inputs = vars.map(v => `<input type="text" class="var-field" data-var="${v}" placeholder="[${v}] の中身">`).join('');
-          varFormHtml = `
-            <div class="variable-container">
-              <span class="variable-title">⚡ 穴埋めパラメータ</span>
-              <div class="variable-inputs">${inputs}</div>
-            </div>
-          `;
+        if (isPrompt) {
+          const vars = extractVariables(item.prompt);
+          if (vars.length > 0) {
+            const inputs = vars.map(v => `<input type="text" class="var-field" data-var="${v}" placeholder="[${v}] の中身">`).join('');
+            varFormHtml = `
+              <div class="variable-container">
+                <span class="variable-title">⚡ 穴埋めパラメータ</span>
+                <div class="variable-inputs">${inputs}</div>
+              </div>
+            `;
+          }
         }
 
+        // リンク
+        let linkGroupHtml = '';
+        if (item.url) {
+          const isInsta = item.url.includes('instagram.com');
+          const label = isPrompt ? '🔗 元リンク' : (isInsta ? '📸 Instagram' : '🔗 元ポスト');
+          linkGroupHtml += `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="action-link link-sns">${label}</a>`;
+        }
+        if (!isPrompt) {
+          const searchTarget = item.area ? `${item.area} ${item.title}` : item.title;
+          linkGroupHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchTarget)}" target="_blank" rel="noopener noreferrer" class="action-link link-map">📍 マップ</a>`;
+        }
+
+        const bodyContent = isPrompt ? item.prompt : item.text;
+
         card.innerHTML = `
-          <div class="card-header">
-            <div class="title-area">
-              <span class="fav-star ${p.isFavorite ? 'active' : ''}" onclick="toggleFavorite('${p.id}')">★</span>
-              <div class="card-title">${p.title}</div>
-            </div>
-            <div class="card-header-btns">
-              <button class="btn-icon-sub" onclick="openEditModal('${p.id}')" title="編集">✏️</button>
-            </div>
-          </div>
-
-          ${tagElements ? `<div class="tags">${tagElements}</div>` : ''}
           ${imageElement}
-          <div class="prompt-box">${p.prompt}</div>
-          ${varFormHtml}
+          <div class="card-body">
+            <div class="card-header">
+              <div class="title-area">
+                <span class="fav-star ${item.isFavorite ? 'active' : ''}" onclick="toggleFavorite('${item.id}')">★</span>
+                <div class="card-title">${item.title}</div>
+              </div>
+              <button class="btn-delete-card" onclick="deleteItem('${item.id}')">削除</button>
+            </div>
 
-          <div class="memo-section">
-            ${p.memo ? `<div class="note-box" id="noteView-${p.id}">💬 ${p.memo}</div>` : ''}
-            <button class="btn-memo-action" id="openMemoBtn-${p.id}">
-              ${p.memo ? '✏️ メモ編集' : '＋ メモ・感想を書く'}
-            </button>
-            <div class="memo-editor" id="memoEditor-${p.id}">
-              <textarea class="memo-textarea" id="memoInput-${p.id}" placeholder="使い勝手や気付きをメモ...">${p.memo || ''}</textarea>
-              <div class="memo-editor-btns">
-                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" id="cancelMemoBtn-${p.id}">キャンセル</button>
-                <button class="btn btn-save" style="padding: 4px 10px; font-size: 0.75rem;" id="saveMemoBtn-${p.id}">保存</button>
+            ${tagElements ? `<div class="tags">${tagElements}</div>` : ''}
+            <div class="content-box ${isPrompt ? 'code-font' : ''}">${bodyContent}</div>
+            ${varFormHtml}
+
+            <div class="memo-section">
+              ${item.memo ? `<div class="note-box" id="noteView-${item.id}">💬 ${item.memo}</div>` : ''}
+              <button class="btn-memo-action" id="openMemoBtn-${item.id}">
+                ${item.memo ? '✏️ メモ編集' : '＋ メモ・感想を書く'}
+              </button>
+              <div class="memo-editor" id="memoEditor-${item.id}">
+                <textarea class="memo-textarea" id="memoInput-${item.id}" placeholder="メモ・使い勝手を記録...">${item.memo || ''}</textarea>
+                <div style="display:flex; justify-content:flex-end; gap:6px;">
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" id="cancelMemoBtn-${item.id}">キャンセル</button>
+                  <button class="btn btn-save" style="padding: 4px 10px; font-size: 0.75rem;" id="saveMemoBtn-${item.id}">保存</button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="card-actions">
-            <div class="card-links">
-              ${urlElement}
-              <span style="font-size: 0.72rem; color: var(--text-muted);">使用: ${p.usedCount || 0}回</span>
+            <div class="card-actions">
+              <div class="link-group">${linkGroupHtml}</div>
+              ${isPrompt ? `<button class="btn btn-copy copy-btn">📋 コピー</button>` : ''}
             </div>
-            <button class="btn btn-copy copy-btn">📋 コピー</button>
           </div>
         `;
 
-        // コピー処理（変数置換対応）
-        card.querySelector('.copy-btn').addEventListener('click', (e) => {
-          let textToCopy = p.prompt;
-          const varInputs = card.querySelectorAll('.var-field');
-          varInputs.forEach(input => {
-            const vName = input.getAttribute('data-var');
-            const val = input.value.trim();
-            if (val) {
-              textToCopy = textToCopy.replaceAll(`[${vName}]`, val);
-            }
+        // コピーアクション（プロンプトのみ）
+        if (isPrompt) {
+          card.querySelector('.copy-btn').addEventListener('click', (e) => {
+            let textToCopy = item.prompt;
+            const varInputs = card.querySelectorAll('.var-field');
+            varInputs.forEach(input => {
+              const vName = input.getAttribute('data-var');
+              const val = input.value.trim();
+              if (val) textToCopy = textToCopy.replaceAll(`[${vName}]`, val);
+            });
+            copyToClipboard(textToCopy, e.target);
           });
-          copyToClipboard(textToCopy, e.target, p.id);
-        });
+        }
 
-        // メモ編集処理
-        const openMemoBtn = card.querySelector(`#openMemoBtn-${p.id}`);
-        const memoEditor = card.querySelector(`#memoEditor-${p.id}`);
-        const cancelMemoBtn = card.querySelector(`#cancelMemoBtn-${p.id}`);
-        const saveMemoBtn = card.querySelector(`#saveMemoBtn-${p.id}`);
-        const memoInput = card.querySelector(`#memoInput-${p.id}`);
+        // メモ編集トグル
+        const openMemoBtn = card.querySelector(`#openMemoBtn-${item.id}`);
+        const memoEditor = card.querySelector(`#memoEditor-${item.id}`);
+        const cancelMemoBtn = card.querySelector(`#cancelMemoBtn-${item.id}`);
+        const saveMemoBtn = card.querySelector(`#saveMemoBtn-${item.id}`);
+        const memoInput = card.querySelector(`#memoInput-${item.id}`);
 
         openMemoBtn.addEventListener('click', () => {
           memoEditor.style.display = 'flex';
@@ -859,11 +967,11 @@
         cancelMemoBtn.addEventListener('click', () => {
           memoEditor.style.display = 'none';
           openMemoBtn.style.display = 'inline-flex';
-          memoInput.value = p.memo || '';
+          memoInput.value = item.memo || '';
         });
 
         saveMemoBtn.addEventListener('click', () => {
-          updateMemo(p.id, memoInput.value);
+          updateMemo(item.id, memoInput.value);
         });
 
         cardList.appendChild(card);
@@ -875,143 +983,149 @@
       render();
     };
 
-    // --- 5. モーダル管理（新規＆編集） ---
+    // --- 5. タブ切り替え ---
+    const tabPrompts = document.getElementById('tabPrompts');
+    const tabClips = document.getElementById('tabClips');
+
+    tabPrompts.addEventListener('click', () => {
+      if (currentTab === 'prompts') return;
+      currentTab = 'prompts';
+      tabPrompts.classList.add('active');
+      tabClips.classList.remove('active');
+      selectedTag = 'ALL';
+      searchInput.value = '';
+      render();
+    });
+
+    tabClips.addEventListener('click', () => {
+      if (currentTab === 'clips') return;
+      currentTab = 'clips';
+      tabClips.classList.add('active');
+      tabPrompts.classList.remove('active');
+      selectedTag = 'ALL';
+      searchInput.value = '';
+      render();
+    });
+
+    // --- 6. モーダル・画像処理 ---
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalHelper = document.getElementById('modalHelper');
+    const modalText = document.getElementById('modalText');
+    const imageFieldGroup = document.getElementById('imageFieldGroup');
     const imageInput = document.getElementById('imageInput');
     const imageDataField = document.getElementById('imageData');
+    const imageLabel = document.getElementById('imageLabel');
 
-    // 画像圧縮してBase64で保持
     imageInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
+      imageLabel.textContent = `✓ ${file.name.slice(0, 15)}...`;
       const reader = new FileReader();
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const maxW = 600;
+          const maxW = 700;
           const scale = Math.min(1, maxW / img.width);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          imageDataField.value = canvas.toDataURL('image/jpeg', 0.7);
+          imageDataField.value = canvas.toDataURL('image/jpeg', 0.72);
         };
         img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     });
 
-    function resetModal() {
-      document.getElementById('editId').value = '';
-      document.getElementById('title').value = '';
-      document.getElementById('promptText').value = '';
-      document.getElementById('tags').value = '';
-      document.getElementById('sourceUrl').value = '';
+    document.getElementById('openModalBtn').addEventListener('click', () => {
+      const isPrompt = (currentTab === 'prompts');
+      modalTitle.textContent = isPrompt ? 'プロンプト追加' : '投稿をストック';
+      modalHelper.textContent = isPrompt 
+        ? '本文だけ貼ればタイトル・タグを自動推定します！[変数] で穴埋め対応' 
+        : 'ツイートやキャプションを貼るだけで店名・県名・ショップを自動抽出！';
+      
+      modalText.value = '';
+      document.getElementById('modalTitleInput').value = '';
+      document.getElementById('modalUrl').value = '';
+      document.getElementById('modalTags').value = '';
       imageInput.value = '';
       imageDataField.value = '';
-      document.getElementById('modalTitle').textContent = 'プロンプト追加';
-      document.getElementById('deleteBtnModal').style.display = 'none';
-    }
+      imageLabel.textContent = '📷 写真・スクショを選択 (推奨)';
+      
+      // 画像添付はSNSタブで前面推奨（プロンプト時も使用可能）
+      imageFieldGroup.style.display = 'block';
 
-    document.getElementById('openModalBtn').addEventListener('click', () => {
-      resetModal();
       modal.style.display = 'flex';
     });
 
-    document.getElementById('closeModalBtn').addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-
-    window.openEditModal = function(id) {
-      const item = prompts.find(p => p.id === id);
-      if (!item) return;
-
-      document.getElementById('editId').value = item.id;
-      document.getElementById('title').value = item.title;
-      document.getElementById('promptText').value = item.prompt;
-      document.getElementById('tags').value = item.tags.join(', ');
-      document.getElementById('sourceUrl').value = item.url || '';
-      imageDataField.value = item.image || '';
-      document.getElementById('modalTitle').textContent = 'プロンプト編集';
-      document.getElementById('deleteBtnModal').style.display = 'inline-block';
-      modal.style.display = 'flex';
-    };
-
-    document.getElementById('deleteBtnModal').addEventListener('click', () => {
-      const id = document.getElementById('editId').value;
-      if (id) deletePrompt(id);
-    });
+    document.getElementById('closeModalBtn').addEventListener('click', () => modal.style.display = 'none');
 
     document.getElementById('saveBtn').addEventListener('click', () => {
-      const editId = document.getElementById('editId').value;
-      const promptText = document.getElementById('promptText').value.trim();
-      let title = document.getElementById('title').value.trim();
-      const tagsRaw = document.getElementById('tags').value.trim();
-      const url = document.getElementById('sourceUrl').value.trim();
+      const isPrompt = (currentTab === 'prompts');
+      const textVal = modalText.value.trim();
+      let titleVal = document.getElementById('modalTitleInput').value.trim();
+      const tagsRaw = document.getElementById('modalTags').value.trim();
+      const url = document.getElementById('modalUrl').value.trim();
       const image = imageDataField.value;
 
-      if (!promptText) {
-        alert('プロンプト本文を入力してください');
+      if (!textVal) {
+        alert('本文を入力してください');
         return;
       }
 
-      if (!title) title = extractTitle(promptText);
+      const metadata = extractMetadata(textVal, !isPrompt);
+      const title = titleVal || extractTitle(textVal);
 
-      let tags = [];
+      let finalTags = metadata.tags;
       if (tagsRaw) {
-        tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
-      } else {
-        tags = extractTags(promptText);
+        const userTags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+        finalTags = Array.from(new Set([...finalTags, ...userTags]));
       }
 
-      if (editId) {
-        // 編集保存
-        const item = prompts.find(p => p.id === editId);
-        if (item) {
-          item.title = title;
-          item.prompt = promptText;
-          item.tags = tags;
-          item.url = url;
-          if (image) item.image = image;
-        }
+      const newItem = {
+        id: Date.now().toString(),
+        title,
+        tags: finalTags,
+        url,
+        image,
+        memo: '',
+        isFavorite: false,
+        createdAt: new Date().toISOString()
+      };
+
+      if (isPrompt) {
+        newItem.prompt = textVal;
+        prompts.unshift(newItem);
+        localStorage.setItem(STORAGE_KEY_PROMPTS, JSON.stringify(prompts));
       } else {
-        // 新規作成
-        prompts.unshift({
-          id: Date.now().toString(),
-          title,
-          prompt: promptText,
-          tags,
-          url,
-          image,
-          memo: '',
-          isFavorite: false,
-          usedCount: 0,
-          lastUsedAt: null,
-          createdAt: new Date().toISOString()
-        });
+        newItem.text = textVal;
+        newItem.area = metadata.detectedArea;
+        clips.unshift(newItem);
+        localStorage.setItem(STORAGE_KEY_CLIPS, JSON.stringify(clips));
       }
 
-      saveToStorage();
+      render();
       modal.style.display = 'none';
     });
 
-    // --- 6. バックアップ＆復元（JSON） ---
+    // --- 7. バックアップ・復元 ---
     const backupModal = document.getElementById('backupModal');
     document.getElementById('backupBtn').addEventListener('click', () => backupModal.style.display = 'flex');
     document.getElementById('closeBackupModalBtn').addEventListener('click', () => backupModal.style.display = 'none');
 
-    // 書き出し
     document.getElementById('exportBtn').addEventListener('click', () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(prompts, null, 2));
+      const allData = { prompts, clips, exportedAt: new Date().toISOString() };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `prompt_stock_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      downloadAnchor.setAttribute("download", `all_stock_backup_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
     });
 
-    // 読み込み
     document.getElementById('importInput').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1019,16 +1133,19 @@
       reader.onload = (event) => {
         try {
           const imported = JSON.parse(event.target.result);
-          if (Array.isArray(imported)) {
-            if (confirm(`ファイルから ${imported.length} 件のプロンプトを復元・統合しますか？`)) {
-              // 重複排除して統合
-              const currentIds = new Set(prompts.map(p => p.id));
-              imported.forEach(item => {
-                if (!currentIds.has(item.id)) {
-                  prompts.push(item);
-                }
-              });
-              saveToStorage();
+          if (imported.prompts || imported.clips) {
+            if (confirm('ファイルからデータを復元・統合しますか？')) {
+              if (Array.isArray(imported.prompts)) {
+                const curPIds = new Set(prompts.map(p => p.id));
+                imported.prompts.forEach(p => { if (!curPIds.has(p.id)) prompts.push(p); });
+                localStorage.setItem(STORAGE_KEY_PROMPTS, JSON.stringify(prompts));
+              }
+              if (Array.isArray(imported.clips)) {
+                const curCIds = new Set(clips.map(c => c.id));
+                imported.clips.forEach(c => { if (!curCIds.has(c.id)) clips.push(c); });
+                localStorage.setItem(STORAGE_KEY_CLIPS, JSON.stringify(clips));
+              }
+              render();
               backupModal.style.display = 'none';
               alert('復元が完了しました！');
             }
@@ -1042,12 +1159,7 @@
       reader.readAsText(file);
     });
 
-    // 検索・並び替え監視
     searchInput.addEventListener('input', render);
-    sortSelect.addEventListener('change', (e) => {
-      currentSort = e.target.value;
-      render();
-    });
 
     // 初回描画
     render();
