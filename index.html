@@ -2,8 +2,14 @@
 <html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Prompt Stock</title>
+  
+  <!-- PWA・ホーム画面アプリ化対応 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+
   <style>
     /* ===================================================
        1. ダークモード（黒背景・ネオン系）
@@ -15,9 +21,9 @@
       --text-main: #F5F5FA;
       --text-muted: #A3A3C2;
       
-      --color-1: #8587F8;          /* パープルブルー：サブアクセント、枠線、見出し */
-      --color-2: #FB76FB;          /* ネオンライトピンク：ボタン、リンク、FAB */
-      --color-3: #EC1278;          /* ビビッドマゼンタ：重要アクション、強調 */
+      --color-1: #8587F8;          /* パープルブルー */
+      --color-2: #FB76FB;          /* ネオンライトピンク */
+      --color-3: #EC1278;          /* ビビッドマゼンタ */
 
       --btn-text-primary: #181824;
       --border-color: rgba(133, 135, 248, 0.25);
@@ -33,9 +39,9 @@
       --text-main: #2E2979;
       --text-muted: #6C66A6;
       
-      --color-1: #2E2979;          /* ダークネイビー：見出し、輪郭 */
-      --color-2: #F39DF4;          /* 明るいピンクパープル：ボタン */
-      --color-3: #9B95EB;          /* ラベンダー：サブボタン、タグ、境界線 */
+      --color-1: #2E2979;          /* ダークネイビー */
+      --color-2: #F39DF4;          /* 明るいピンクパープル */
+      --color-3: #9B95EB;          /* ラベンダー */
 
       --btn-text-primary: #2E2979;
       --border-color: rgba(155, 149, 235, 0.35);
@@ -61,7 +67,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .logo-area {
@@ -83,43 +89,94 @@
       font-weight: 500;
     }
 
-    .theme-toggle-btn {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
       background: var(--bg-surface);
       border: 1.5px solid var(--border-color);
       color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 20px;
+      padding: 6px 10px;
+      border-radius: 18px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      gap: 4px;
     }
-    .theme-toggle-btn:active {
-      transform: scale(0.96);
+    .icon-btn:active { transform: scale(0.96); }
+
+    /* コントロールバー（検索 + ソート） */
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
     .search-box {
-      width: 100%;
-      padding: 12px 16px;
+      flex: 1;
+      padding: 10px 14px;
       border-radius: 12px;
       border: 1.5px solid var(--border-color);
       background: var(--bg-surface);
       color: var(--text-main);
-      font-size: 0.95rem;
-      margin-bottom: 16px;
+      font-size: 0.9rem;
       outline: none;
     }
-    .search-box:focus {
-      border-color: var(--color-2);
-    }
-    .search-box::placeholder {
-      color: var(--text-muted);
-      opacity: 0.8;
+    .search-box:focus { border-color: var(--color-2); }
+    .search-box::placeholder { color: var(--text-muted); opacity: 0.8; }
+
+    .sort-select {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      outline: none;
     }
 
+    /* タグ・フォルダ横スクロールバー */
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .category-scroll::-webkit-scrollbar { display: none; }
+
+    .cat-chip {
+      white-space: nowrap;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .cat-chip.active {
+      background: var(--color-2);
+      border-color: var(--color-2);
+      color: var(--btn-text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .cat-count { font-size: 0.7rem; opacity: 0.85; }
+
+    /* プロンプトカード一覧 */
     .card-list {
       display: flex;
       flex-direction: column;
@@ -130,11 +187,15 @@
       background: var(--bg-surface);
       border: 1.5px solid var(--border-color);
       border-radius: 14px;
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    .card.is-favorite {
+      border-color: var(--color-2);
     }
 
     .card-header {
@@ -144,102 +205,179 @@
       gap: 8px;
     }
 
+    .title-area {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .fav-star {
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      user-select: none;
+      transition: transform 0.15s;
+    }
+    .fav-star.active {
+      color: #ffb703;
+      transform: scale(1.1);
+    }
+
     .card-title {
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 1rem;
       color: var(--text-main);
       word-break: break-all;
     }
 
+    .card-header-btns {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .btn-icon-sub {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px;
+    }
+    .btn-icon-sub:hover { color: var(--color-1); }
+
     .tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
     }
 
     .tag {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       background: var(--bg-subtle);
       color: var(--color-1);
-      padding: 3px 10px;
-      border-radius: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
       border: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+
+    /* 画像プレビュー */
+    .card-image-wrap {
+      width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .prompt-box {
       background: var(--bg-subtle);
       border-radius: 10px;
-      padding: 12px;
+      padding: 10px 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.85rem;
       line-height: 1.45;
       color: var(--text-main);
       white-space: pre-wrap;
       word-break: break-all;
-      max-height: 120px;
+      max-height: 110px;
       overflow-y: auto;
       border: 1px dashed var(--border-color);
     }
 
-    /* メモ・コメント表示エリア */
+    /* 変数プレースホルダー置換フォーム */
+    .variable-container {
+      background: rgba(133, 135, 248, 0.08);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .variable-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--color-1);
+    }
+    .variable-inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 6px;
+    }
+    .var-field {
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .var-field:focus { border-color: var(--color-2); }
+
+    /* メモ・コメントセクション */
     .memo-section {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
-
     .note-box {
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       line-height: 1.4;
       color: var(--text-muted);
       background: var(--bg-subtle);
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
       border-left: 3.5px solid var(--color-3);
       white-space: pre-wrap;
     }
-
     .memo-editor {
       display: none;
       flex-direction: column;
       gap: 6px;
     }
-
     .memo-textarea {
       width: 100%;
-      padding: 8px 10px;
+      padding: 8px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
       background: var(--bg-subtle);
       color: var(--text-main);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       outline: none;
       resize: vertical;
-      min-height: 60px;
+      min-height: 55px;
     }
-
     .memo-editor-btns {
       display: flex;
       justify-content: flex-end;
       gap: 6px;
     }
-
     .btn-memo-action {
       background: none;
       border: none;
       color: var(--color-1);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       align-self: flex-start;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 2px 4px;
-    }
-    .btn-memo-action:hover {
-      text-decoration: underline;
+      padding: 2px;
     }
 
     /* アクション */
@@ -249,31 +387,28 @@
       align-items: center;
       margin-top: 2px;
     }
-
     .card-links {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
     }
-
     .x-link {
       color: var(--color-2);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-    }
-    .x-link:hover {
-      text-decoration: underline;
+      gap: 2px;
     }
 
     .btn {
       border: none;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 0.85rem;
+      padding: 7px 14px;
+      border-radius: 9px;
+      font-size: 0.82rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -282,33 +417,20 @@
       gap: 4px;
       transition: transform 0.15s;
     }
-    .btn:active {
-      transform: scale(0.96);
-    }
+    .btn:active { transform: scale(0.96); }
 
     .btn-copy {
       background: var(--color-2);
       color: var(--btn-text-primary);
-      box-shadow: 0 2px 8px rgba(243, 157, 244, 0.25);
-    }
-
-    .btn-delete {
-      background: transparent;
-      color: var(--color-3);
-      border: 1px solid var(--color-3);
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
     .fab {
       position: fixed;
       bottom: 22px;
       right: 20px;
-      width: 58px;
-      height: 58px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       background: var(--color-2);
       color: var(--btn-text-primary);
@@ -317,13 +439,11 @@
       align-items: center;
       justify-content: center;
       border: none;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       cursor: pointer;
       z-index: 50;
     }
-    .fab:active {
-      transform: scale(0.92);
-    }
+    .fab:active { transform: scale(0.92); }
 
     /* モーダル */
     .modal-overlay {
@@ -343,53 +463,47 @@
       border-radius: 16px;
       width: 100%;
       max-width: 480px;
-      padding: 20px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     }
-    .modal h2 {
-      font-size: 1.15rem;
-      color: var(--color-1);
-    }
-    .helper-text {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: -6px;
-    }
+    .modal h2 { font-size: 1.1rem; color: var(--color-1); }
+    .helper-text { font-size: 0.75rem; color: var(--text-muted); margin-top: -6px; }
+
     .input-field {
       width: 100%;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border-radius: 8px;
       border: 1.5px solid var(--border-color);
       background: var(--bg-subtle);
       color: var(--text-main);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       outline: none;
     }
-    .input-field:focus {
-      border-color: var(--color-2);
+    .input-field:focus { border-color: var(--color-2); }
+    textarea.input-field { resize: vertical; min-height: 85px; }
+
+    .file-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
-    textarea.input-field {
-      resize: vertical;
-      min-height: 90px;
-    }
+
     .modal-btns {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 8px;
       margin-top: 4px;
     }
-    .btn-save {
-      background: var(--color-2);
-      color: var(--btn-text-primary);
-    }
-    .btn-secondary {
-      background: var(--bg-subtle);
-      color: var(--text-muted);
-      border: 1px solid var(--border-color);
-    }
+    .btn-save { background: var(--color-2); color: var(--btn-text-primary); }
+    .btn-secondary { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border-color); }
+    .btn-delete-full { background: transparent; color: var(--color-3); border: 1px solid var(--color-3); }
   </style>
 </head>
 <body>
@@ -399,52 +513,89 @@
       <h1>Prompt Stock</h1>
       <span id="count" class="count-badge">0 items</span>
     </div>
-    <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="テーマ切り替え">
-      <span id="themeIcon">☀️</span>
-      <span id="themeLabel">Light</span>
-    </button>
+    <div class="header-actions">
+      <button id="backupBtn" class="icon-btn" title="データバックアップ">💾 管理</button>
+      <button id="themeToggleBtn" class="icon-btn" aria-label="テーマ切り替え">
+        <span id="themeIcon">☀️</span>
+      </button>
+    </div>
   </header>
 
-  <input type="text" id="search" class="search-box" placeholder="タイトル・タグ・本文・メモから検索...">
+  <!-- 検索 & 並び替えバー -->
+  <div class="controls">
+    <input type="text" id="search" class="search-box" placeholder="キーワード検索...">
+    <select id="sortSelect" class="sort-select">
+      <option value="newest">新しい順</option>
+      <option value="popular">使用回数順</option>
+      <option value="recent">最近使った順</option>
+    </select>
+  </div>
 
+  <!-- タグ・フォルダ横スクロールバー -->
+  <div id="categoryFilter" class="category-scroll"></div>
+
+  <!-- カード一覧 -->
   <div id="cardList" class="card-list"></div>
 
+  <!-- 新規作成ボタン -->
   <button class="fab" id="openModalBtn" aria-label="新規プロンプト作成">＋</button>
 
-  <!-- 投稿用モーダル -->
+  <!-- プロンプト追加・編集モーダル -->
   <div class="modal-overlay" id="modal">
     <div class="modal">
-      <h2>プロンプト追加</h2>
-      <p class="helper-text">※プロンプト本文だけ貼れば、タイトルやタグは自動抽出されます</p>
-      <textarea id="promptText" class="input-field" placeholder="プロンプト本文を貼り付け（必須）..." rows="5" required></textarea>
+      <h2 id="modalTitle">プロンプト追加</h2>
+      <p class="helper-text">※本文だけ貼ればタイトルやタグを自動推定します。[変数名] で穴埋め可能！</p>
+      
+      <input type="hidden" id="editId">
+      <textarea id="promptText" class="input-field" placeholder="プロンプト本文（必須）... 例: [髪色]のショートヘアの女の子" rows="5" required></textarea>
       <input type="text" id="title" class="input-field" placeholder="タイトル（空欄で自動抽出）">
-      <input type="text" id="tags" class="input-field" placeholder="タグ（空欄で自動抽出 / カンマ区切り）">
+      <input type="text" id="tags" class="input-field" placeholder="タグ（カンマ区切り / 空欄で自動抽出）">
       <input type="url" id="sourceUrl" class="input-field" placeholder="参考URL（Xのリンクなど）">
+      
+      <div class="file-input-wrap">
+        <label>🖼️ 生成結果画像 (任意):</label>
+        <input type="file" id="imageInput" accept="image/*">
+      </div>
+      <input type="hidden" id="imageData">
+
       <div class="modal-btns">
+        <button class="btn btn-delete-full" id="deleteBtnModal" style="display: none; margin-right: auto;">削除</button>
         <button class="btn btn-secondary" id="closeModalBtn">キャンセル</button>
         <button class="btn btn-save" id="saveBtn">保存する</button>
       </div>
     </div>
   </div>
 
+  <!-- バックアップ・復元モーダル -->
+  <div class="modal-overlay" id="backupModal">
+    <div class="modal">
+      <h2>データ管理・バックアップ</h2>
+      <p class="helper-text">端末変更やブラウザの履歴削除対策に、データをファイル保存しておけます。</p>
+      
+      <button class="btn btn-save" id="exportBtn" style="width: 100%; padding: 10px;">📤 データを書き出す (JSON保存)</button>
+      
+      <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 6px 0;">
+      
+      <label style="font-size: 0.85rem; font-weight: 600;">📥 データを読み込む (復元):</label>
+      <input type="file" id="importInput" accept=".json" class="input-field">
+
+      <div class="modal-btns">
+        <button class="btn btn-secondary" id="closeBackupModalBtn">閉じる</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // --- テーマ設定 ---
+    // --- 1. テーマ設定 ---
     const THEME_KEY = 'prompt_stock_theme';
     const htmlEl = document.documentElement;
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const themeIcon = document.getElementById('themeIcon');
-    const themeLabel = document.getElementById('themeLabel');
 
     function applyTheme(theme) {
       htmlEl.setAttribute('data-theme', theme);
       localStorage.setItem(THEME_KEY, theme);
-      if (theme === 'dark') {
-        themeIcon.textContent = '☀️';
-        themeLabel.textContent = 'Light';
-      } else {
-        themeIcon.textContent = '🌙';
-        themeLabel.textContent = 'Dark';
-      }
+      themeIcon.textContent = (theme === 'dark') ? '☀️' : '🌙';
     }
 
     const currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
@@ -455,7 +606,7 @@
       applyTheme(nextTheme);
     });
 
-    // --- 自動抽出ロジック ---
+    // --- 2. 自動抽出ロジック ---
     function extractTitle(text) {
       const firstLine = text.trim().split('\n')[0].replace(/^[#\-*>\s]+/, '').trim();
       return firstLine.length > 30 ? firstLine.slice(0, 30) + '…' : firstLine || '無題のプロンプト';
@@ -474,19 +625,27 @@
       ];
       const tags = [];
       dict.forEach(item => {
-        if (item.word.test(text)) {
-          tags.push(item.tag);
-        }
+        if (item.word.test(text)) tags.push(item.tag);
       });
       return tags.length > 0 ? tags : ['プロンプト'];
     }
 
-    // --- データ保存・描画 ---
+    function extractVariables(text) {
+      const matches = text.match(/\[(.*?)\]/g);
+      if (!matches) return [];
+      return [...new Set(matches.map(m => m.slice(1, -1)))];
+    }
+
+    // --- 3. データ管理 ---
     const STORAGE_KEY = 'my_prompts_data';
     let prompts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let selectedTag = 'ALL';
+    let currentSort = 'newest';
 
     const cardList = document.getElementById('cardList');
+    const categoryFilter = document.getElementById('categoryFilter');
     const searchInput = document.getElementById('search');
+    const sortSelect = document.getElementById('sortSelect');
     const countDisplay = document.getElementById('count');
     const modal = document.getElementById('modal');
 
@@ -495,18 +654,35 @@
       render();
     }
 
-    function copyToClipboard(text, btn) {
+    function copyToClipboard(text, btn, promptId) {
       navigator.clipboard.writeText(text).then(() => {
         const originalText = btn.textContent;
         btn.textContent = '✓ 完了';
         setTimeout(() => { btn.textContent = originalText; }, 1400);
+
+        // 使用回数 & 最終使用日時更新
+        const item = prompts.find(p => p.id === promptId);
+        if (item) {
+          item.usedCount = (item.usedCount || 0) + 1;
+          item.lastUsedAt = new Date().toISOString();
+          saveToStorage();
+        }
       });
     }
+
+    window.toggleFavorite = function(id) {
+      const item = prompts.find(p => p.id === id);
+      if (item) {
+        item.isFavorite = !item.isFavorite;
+        saveToStorage();
+      }
+    };
 
     window.deletePrompt = function(id) {
       if (confirm('このプロンプトを削除しますか？')) {
         prompts = prompts.filter(p => p.id !== id);
         saveToStorage();
+        modal.style.display = 'none';
       }
     };
 
@@ -518,14 +694,68 @@
       }
     };
 
+    // --- 4. 描画処理 ---
+    function renderCategoryBar() {
+      const tagCounts = {};
+      prompts.forEach(p => {
+        p.tags.forEach(t => {
+          tagCounts[t] = (tagCounts[t] || 0) + 1;
+        });
+      });
+
+      const tags = Object.keys(tagCounts);
+      if (selectedTag !== 'ALL' && !tags.includes(selectedTag)) {
+        selectedTag = 'ALL';
+      }
+
+      categoryFilter.innerHTML = '';
+
+      const allChip = document.createElement('button');
+      allChip.className = `cat-chip ${selectedTag === 'ALL' ? 'active' : ''}`;
+      allChip.innerHTML = `すべて <span class="cat-count">(${prompts.length})</span>`;
+      allChip.addEventListener('click', () => { selectedTag = 'ALL'; render(); });
+      categoryFilter.appendChild(allChip);
+
+      tags.forEach(t => {
+        const chip = document.createElement('button');
+        chip.className = `cat-chip ${selectedTag === t ? 'active' : ''}`;
+        chip.innerHTML = `#${t} <span class="cat-count">(${tagCounts[t]})</span>`;
+        chip.addEventListener('click', () => {
+          selectedTag = (selectedTag === t) ? 'ALL' : t;
+          render();
+        });
+        categoryFilter.appendChild(chip);
+      });
+    }
+
     function render() {
+      renderCategoryBar();
+
       const keyword = searchInput.value.toLowerCase();
-      const filtered = prompts.filter(p => 
-        p.title.toLowerCase().includes(keyword) ||
-        p.prompt.toLowerCase().includes(keyword) ||
-        p.tags.some(t => t.toLowerCase().includes(keyword)) ||
-        (p.memo && p.memo.toLowerCase().includes(keyword))
-      );
+      let filtered = prompts.filter(p => {
+        const matchesTag = (selectedTag === 'ALL') || p.tags.includes(selectedTag);
+        const matchesKeyword = 
+          p.title.toLowerCase().includes(keyword) ||
+          p.prompt.toLowerCase().includes(keyword) ||
+          p.tags.some(t => t.toLowerCase().includes(keyword)) ||
+          (p.memo && p.memo.toLowerCase().includes(keyword));
+        return matchesTag && matchesKeyword;
+      });
+
+      // 並び替えロジック
+      filtered.sort((a, b) => {
+        // お気に入りは最優先
+        if (a.isFavorite && !b.isFavorite) return -1;
+        if (!a.isFavorite && b.isFavorite) return 1;
+
+        if (currentSort === 'popular') {
+          return (b.usedCount || 0) - (a.usedCount || 0);
+        } else if (currentSort === 'recent') {
+          return new Date(b.lastUsedAt || 0) - new Date(a.lastUsedAt || 0);
+        } else {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+      });
 
       countDisplay.textContent = `${filtered.length} items`;
       cardList.innerHTML = '';
@@ -533,7 +763,7 @@
       if (filtered.length === 0) {
         cardList.innerHTML = `
           <div style="text-align: center; color: var(--text-muted); margin-top: 48px; font-size: 0.9rem;">
-            登録されたプロンプトがありません<br>右下の「＋」からストックを追加できます
+            プロンプトが見つかりませんでした
           </div>
         `;
         return;
@@ -541,44 +771,79 @@
 
       filtered.forEach(p => {
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = `card ${p.isFavorite ? 'is-favorite' : ''}`;
 
-        const tagElements = p.tags.map(t => `<span class="tag">#${t}</span>`).join('');
-        const urlElement = p.url ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer" class="x-link">🔗 元リンク</a>` : '';
+        const tagElements = p.tags.map(t => `<span class="tag" onclick="selectSingleTag('${t}')">#${t}</span>`).join('');
+        const urlElement = p.url ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer" class="x-link">🔗 元ポスト</a>` : '';
+        const imageElement = p.image ? `<div class="card-image-wrap"><img src="${p.image}" class="card-image" alt="結果画像"></div>` : '';
+
+        // 変数フォーム生成
+        const vars = extractVariables(p.prompt);
+        let varFormHtml = '';
+        if (vars.length > 0) {
+          const inputs = vars.map(v => `<input type="text" class="var-field" data-var="${v}" placeholder="[${v}] の中身">`).join('');
+          varFormHtml = `
+            <div class="variable-container">
+              <span class="variable-title">⚡ 穴埋めパラメータ</span>
+              <div class="variable-inputs">${inputs}</div>
+            </div>
+          `;
+        }
 
         card.innerHTML = `
           <div class="card-header">
-            <div class="card-title">${p.title}</div>
-            <button class="btn-delete" onclick="deletePrompt('${p.id}')">削除</button>
+            <div class="title-area">
+              <span class="fav-star ${p.isFavorite ? 'active' : ''}" onclick="toggleFavorite('${p.id}')">★</span>
+              <div class="card-title">${p.title}</div>
+            </div>
+            <div class="card-header-btns">
+              <button class="btn-icon-sub" onclick="openEditModal('${p.id}')" title="編集">✏️</button>
+            </div>
           </div>
-          ${tagElements ? `<div class="tags">${tagElements}</div>` : ''}
-          <div class="prompt-box">${p.prompt}</div>
 
-          <!-- メモ・コメントセクション -->
+          ${tagElements ? `<div class="tags">${tagElements}</div>` : ''}
+          ${imageElement}
+          <div class="prompt-box">${p.prompt}</div>
+          ${varFormHtml}
+
           <div class="memo-section">
             ${p.memo ? `<div class="note-box" id="noteView-${p.id}">💬 ${p.memo}</div>` : ''}
             <button class="btn-memo-action" id="openMemoBtn-${p.id}">
-              ${p.memo ? '✏️ メモ・使い勝手を編集' : '＋ メモ・コメントを書く'}
+              ${p.memo ? '✏️ メモ編集' : '＋ メモ・感想を書く'}
             </button>
             <div class="memo-editor" id="memoEditor-${p.id}">
               <textarea class="memo-textarea" id="memoInput-${p.id}" placeholder="使い勝手や気付きをメモ...">${p.memo || ''}</textarea>
               <div class="memo-editor-btns">
                 <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" id="cancelMemoBtn-${p.id}">キャンセル</button>
-                <button class="btn btn-save" style="padding: 4px 10px; font-size: 0.75rem;" id="saveMemoBtn-${p.id}">メモ保存</button>
+                <button class="btn btn-save" style="padding: 4px 10px; font-size: 0.75rem;" id="saveMemoBtn-${p.id}">保存</button>
               </div>
             </div>
           </div>
 
           <div class="card-actions">
-            <div class="card-links">${urlElement}</div>
+            <div class="card-links">
+              ${urlElement}
+              <span style="font-size: 0.72rem; color: var(--text-muted);">使用: ${p.usedCount || 0}回</span>
+            </div>
             <button class="btn btn-copy copy-btn">📋 コピー</button>
           </div>
         `;
 
-        // コピーイベント
-        card.querySelector('.copy-btn').addEventListener('click', (e) => copyToClipboard(p.prompt, e.target));
+        // コピー処理（変数置換対応）
+        card.querySelector('.copy-btn').addEventListener('click', (e) => {
+          let textToCopy = p.prompt;
+          const varInputs = card.querySelectorAll('.var-field');
+          varInputs.forEach(input => {
+            const vName = input.getAttribute('data-var');
+            const val = input.value.trim();
+            if (val) {
+              textToCopy = textToCopy.replaceAll(`[${vName}]`, val);
+            }
+          });
+          copyToClipboard(textToCopy, e.target, p.id);
+        });
 
-        // メモ編集トグル
+        // メモ編集処理
         const openMemoBtn = card.querySelector(`#openMemoBtn-${p.id}`);
         const memoEditor = card.querySelector(`#memoEditor-${p.id}`);
         const cancelMemoBtn = card.querySelector(`#cancelMemoBtn-${p.id}`);
@@ -605,26 +870,92 @@
       });
     }
 
-    // モーダル開閉
-    document.getElementById('openModalBtn').addEventListener('click', () => modal.style.display = 'flex');
-    document.getElementById('closeModalBtn').addEventListener('click', () => modal.style.display = 'none');
+    window.selectSingleTag = function(tag) {
+      selectedTag = tag;
+      render();
+    };
 
-    // 新規登録
+    // --- 5. モーダル管理（新規＆編集） ---
+    const imageInput = document.getElementById('imageInput');
+    const imageDataField = document.getElementById('imageData');
+
+    // 画像圧縮してBase64で保持
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxW = 600;
+          const scale = Math.min(1, maxW / img.width);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          imageDataField.value = canvas.toDataURL('image/jpeg', 0.7);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function resetModal() {
+      document.getElementById('editId').value = '';
+      document.getElementById('title').value = '';
+      document.getElementById('promptText').value = '';
+      document.getElementById('tags').value = '';
+      document.getElementById('sourceUrl').value = '';
+      imageInput.value = '';
+      imageDataField.value = '';
+      document.getElementById('modalTitle').textContent = 'プロンプト追加';
+      document.getElementById('deleteBtnModal').style.display = 'none';
+    }
+
+    document.getElementById('openModalBtn').addEventListener('click', () => {
+      resetModal();
+      modal.style.display = 'flex';
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    window.openEditModal = function(id) {
+      const item = prompts.find(p => p.id === id);
+      if (!item) return;
+
+      document.getElementById('editId').value = item.id;
+      document.getElementById('title').value = item.title;
+      document.getElementById('promptText').value = item.prompt;
+      document.getElementById('tags').value = item.tags.join(', ');
+      document.getElementById('sourceUrl').value = item.url || '';
+      imageDataField.value = item.image || '';
+      document.getElementById('modalTitle').textContent = 'プロンプト編集';
+      document.getElementById('deleteBtnModal').style.display = 'inline-block';
+      modal.style.display = 'flex';
+    };
+
+    document.getElementById('deleteBtnModal').addEventListener('click', () => {
+      const id = document.getElementById('editId').value;
+      if (id) deletePrompt(id);
+    });
+
     document.getElementById('saveBtn').addEventListener('click', () => {
+      const editId = document.getElementById('editId').value;
       const promptText = document.getElementById('promptText').value.trim();
       let title = document.getElementById('title').value.trim();
       const tagsRaw = document.getElementById('tags').value.trim();
       const url = document.getElementById('sourceUrl').value.trim();
+      const image = imageDataField.value;
 
       if (!promptText) {
         alert('プロンプト本文を入力してください');
         return;
       }
 
-      // 未入力なら自動抽出
-      if (!title) {
-        title = extractTitle(promptText);
-      }
+      if (!title) title = extractTitle(promptText);
 
       let tags = [];
       if (tagsRaw) {
@@ -633,27 +964,90 @@
         tags = extractTags(promptText);
       }
 
-      prompts.unshift({
-        id: Date.now().toString(),
-        title,
-        prompt: promptText,
-        tags,
-        url,
-        memo: '', // メモはあとから追加
-        createdAt: new Date().toISOString()
-      });
+      if (editId) {
+        // 編集保存
+        const item = prompts.find(p => p.id === editId);
+        if (item) {
+          item.title = title;
+          item.prompt = promptText;
+          item.tags = tags;
+          item.url = url;
+          if (image) item.image = image;
+        }
+      } else {
+        // 新規作成
+        prompts.unshift({
+          id: Date.now().toString(),
+          title,
+          prompt: promptText,
+          tags,
+          url,
+          image,
+          memo: '',
+          isFavorite: false,
+          usedCount: 0,
+          lastUsedAt: null,
+          createdAt: new Date().toISOString()
+        });
+      }
 
       saveToStorage();
-
-      // リセット
-      document.getElementById('title').value = '';
-      document.getElementById('promptText').value = '';
-      document.getElementById('tags').value = '';
-      document.getElementById('sourceUrl').value = '';
       modal.style.display = 'none';
     });
 
+    // --- 6. バックアップ＆復元（JSON） ---
+    const backupModal = document.getElementById('backupModal');
+    document.getElementById('backupBtn').addEventListener('click', () => backupModal.style.display = 'flex');
+    document.getElementById('closeBackupModalBtn').addEventListener('click', () => backupModal.style.display = 'none');
+
+    // 書き出し
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(prompts, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `prompt_stock_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // 読み込み
+    document.getElementById('importInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported)) {
+            if (confirm(`ファイルから ${imported.length} 件のプロンプトを復元・統合しますか？`)) {
+              // 重複排除して統合
+              const currentIds = new Set(prompts.map(p => p.id));
+              imported.forEach(item => {
+                if (!currentIds.has(item.id)) {
+                  prompts.push(item);
+                }
+              });
+              saveToStorage();
+              backupModal.style.display = 'none';
+              alert('復元が完了しました！');
+            }
+          } else {
+            alert('データの形式が正しくありません');
+          }
+        } catch (err) {
+          alert('ファイルの読み込みに失敗しました');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // 検索・並び替え監視
     searchInput.addEventListener('input', render);
+    sortSelect.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      render();
+    });
 
     // 初回描画
     render();
